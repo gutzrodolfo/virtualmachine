@@ -8,7 +8,8 @@ using namespace std;
 
 class Assembler {
  public:
-	Assembler(string filename);//Argument will be passed from the os.cpp file
+	
+    Assembler(string filename);//Argument will be passed from the os.cpp file
 	void parse();// Will go through the a file to output the .o file
 	void load();
 	void loadi();
@@ -44,7 +45,8 @@ class Assembler {
 	void write();
 	void halt(); 
 	void noop();
- private:
+ 
+private:
  	typedef void (*pfunc)(string);
  	map<string, pfunc> functions; // Will be mapped to the functions to call them
  	fstream in, out; //One will be the .s file while the other will be the .o file 
