@@ -6,12 +6,33 @@
 #include "Assembler.h"
 
 using namespace std;
-int RD, RS, ADDR, CONST;
 
-string btd(int x){
+string dtb(int x){
 	return "Test";
 }
-string btd2(int x){
+int btd(string code){
+
+}
+int format1(string opcode, int rd, string i, int rs){
+	string RD, RS, code;
+	RD = dtb(rd); RS = dtb(rs);
+	code = opcode + RD + i + RS + "000000";
+	return btd(code);
+}
+
+int format2(string opcode, int rd, string i, int addr){
+	string RD, RS, ADDR, code;
+	RD = dtb(rd); RS = dtb(rs);
+	if (i == "1"){
+		ADDR = dtb2(addr);
+	}
+	else{
+		ADDR = dtb(addr);
+	}
+	code = opcode + RD + i + RS + ADDR;
+	return btd(code);
+}
+string dtb2(int x){
 	return "Test2";
 }
 
@@ -21,140 +42,108 @@ Assembler::Assembler(string filename){
 }
 
 void Assembler::shl(){
-	opcode = "01001";
-	RD >> in;
-	rd = btd(RD);
-	machcode = opcode + rd + "000000000";
+	rd >> in;
+	machcode = format1("01001", rd, "0", 0);
 	out << machcode + "\n";
 }
 
 void Assembler::shla(){
-	opcode = "01010";
-	RD >> in;
-	rd = btd(RD);
-	machcode = opcode + rd + "000000000";
+	rd >> in;
+	machcode = format1("01010", rd, "0", 0);
 	out << machcode + "\n";
 }
 
 void Assembler::shr(){
-	opcode = "01011";
-	RD >> in;
-	rd = btd(RD);
-	machcode = opcode + rd + "000000000";
+	rd >> in;
+	machcode = format1("01011", rd, "0", 0);
 	out << machcode + "\n";
 }
 
 void Assembler::shra(){
-	opcode = "01100";
-	RD >> in;
-	rd = btd(RD);
-	machcode = opcode + rd + "000000000";
+	rd >> in;
+	machcode = format1("01010", rd, "0", 0);
 	out << machcode + "\n";
 }
 
 void Assembler::compr(){
-	opcode = "01101";
-	RD >> in;
-	RS << in;
-	rd = btd(RD);
-	rs = btd(RS);
-	machcode = opcode + rd + "1" + rs + "000000";
+	rd >> in;
+	rs << in;
+	machcode = format1("01101", rd, "0", rs);
 	out << machcode + "\n";
 }
 
 void Assembler::compri(){
-	opcode = "01101";
-	RD >> in;
-	CONST << in;
-	rd = btd(RD);
-	constant = btd2(CONST);
-	machcode = opcode + rd + "1" + constant;
+	rd >> in;
+	addr << in;
+	machcode = format2("01101", rd, "1", addr);
 	out << machcode + "\n";
 }
 
 void Assembler::getstat(){
-	opcode = "01110";
-	RD >> in;
-	rd = btd(RD);
-	machcode = opcode + rd + "000000000";
+	rd >> in;
+	machcode = format1("01110", rd, "0", 0);
 	out << machcode + "\n";
 }
 
 void Assembler::putstat(){
-	opcode = "01111";
-	RD >> in;
-	rd = btd(RD);
-	machcode = opcode + rd + "000000000";
+	rd >> in;
+	machcode = format1("01111", rd, "0", 0);
 	out << machcode + "\n";
 }
 
 void Assembler::jump(){
-	opcode = "10000";
-	ADDR >> in;
-	addr = btd(ADDR);
-	machcode = opcode + "000" +  addr;
+	addr >> in;
+	machcode = format2("10000", 0, "0", addr);
 	out << machcode + "\n";
 }
 
 void Assembler::jumpl(){
-	opcode = "10001";
 	ADDR >> in;
-	addr = btd(ADDR);
-	machcode = opcode + "000" +  addr;
+	machcode = format2("10001", 0, "0", addr);
 	out << machcode + "\n";
 }
 
 void Assembler::jumpe(){
-	opcode = "10010";
-	ADDR >> in;
-	addr = btd(ADDR);
-	machcode = opcode + "000" +  addr;
+	addr >> in;
+	machcode = format2("10010", 0, "0", addr);
 	out << machcode + "\n";
 }
 
 void Assembler::jumpg(){
-	opcode = "10011";
-	ADDR >> in;
-	addr = btd(ADDR);
-	machcode = opcode + "000" +  addr;
+	addr >> in;
+	machcode = format2("10011", 0, "0", addr);
 	out << machcode + "\n";
 }
 
 void Assembler::call(){
-	opcode = "10100";
-	ADDR >> in;
-	addr = btd(ADDR);
-	machcode = opcode + "000" +  addr;
+	addr >> in;
+	machcode = format1("10100", 0, "0", addr);
 	out << machcode + "\n";
 }
 
 void Assembler::ret(){
-	machcode = "1010100000000000";
+	machcode = format1("10101", 0, "0", 0);
 	out << machcode + "\n";
 }
 
 void Assembler::read(){
-	opcode = "10110";
-	RD >> in;
-	rd = btd(RD);
-	machcode = opcode + rd + "000000000";
+	rd >> in;
+	machcode = format1("10110", rd, "0", 0);
 	out << machcode + "\n";
 }
 
 void Assembler::write(){
-	opcode = "10111";
-	RD >> in;
-	rd = btd(RD);
-	machcode = opcode  + rd + "000000000";
+	rd >> in;
+	machcode = format1("10111", rd, "0", 0);
 	out << machcode + "\n";
 }
 
 void Assembler::halt(){
-	machcode = "1100000000000000"; //As  no-op only requires the opcode 0's are placed in the rest
+	machcode = format1("11000", 0, "0", 0); //As  no-op only requires the opcode 0's are placed in the rest
 	out << machcode + "\n";
 }
 
 void Assembler::noop(){
-	machcode = "1100100000000000"; //As  no-op only requires the opcode 0's are placed in the rest
+	machcode = format1("11001", 0, "0", 0); //As  no-op only requires the opcode 0's are placed in the rest
 	out << machcode + "\n";
 }

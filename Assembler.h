@@ -48,5 +48,6 @@ class Assembler {
  	typedef void (*pfunc)(string);
  	map<string, pfunc> functions; // Will be mapped to the functions to call them
  	fstream in, out; //One will be the .s file while the other will be the .o file 
- 	string opcode, rd, rs, constant, addr, machcode; //Different parts of the opcode
+ 	string opcode;
+ 	int rd, rs, constant, addr, machcode; //Different parts of the instruction
 };
