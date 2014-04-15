@@ -29,14 +29,14 @@ string dtb(int x, int sz){
 
 string dtb2(int x, int sz){
 	if(x >= 0){
-		return dtb(x, sz);//If positive just call decimal to binary
+		return dtb(x, sz);          //If positive just call decimal to binary
 	}
 	else {
 		string y;
-		x *= -1;//Negate the number
-		y = dtb(x, sz);//Take the number get the binary form 
-		//Take the 2's complement now
-		//Negate the entire thing
+		x *= -1;                    //Negate the number
+		y = dtb(x, sz);             //Take the number get the binary form
+                                    //Take the 2's complement now
+                                    //Negate the entire thing
 		for (int i = 0; i < y.size(); i++) {
 			if(y[i] == '1') { 
 				y[i] = '0';
@@ -71,20 +71,23 @@ int btd(string code){
 
 // Instruction format functions
 
-int format1(string opcode, int rd, string i, int rs){
-	string RD, RS, code;
-	RD = dtb(rd, 2); RS = dtb(rs, 2);
+int format1( string opcode, int rd, string i, int rs ) {
+	
+    string RD, RS, code;
+	RD = dtb( rd, 2 ); RS = dtb( rs, 2 );
 	code = opcode + RD + i + RS + "000000";
-	return btd(code);
+	return btd( code );
 }
 
-int format2(string opcode, int rd, string i, int addr){
-	string RD, RS, ADDR, code;
+int format2( string opcode, int rd, string i, int addr ) {
+	
+    string RD, RS, ADDR, code;
 	RD = dtb(rd, 2);
-	if (i == "1"){
+	
+    if ( i == "1" ) {
 		ADDR = dtb2(addr, 8);
 	}
-	else{
+	else {
 		ADDR = dtb(addr, 8);
 	}
 	code = opcode + RD + i + RS + ADDR;
@@ -143,52 +146,116 @@ void Assembler::parse() {
 
 
 void Assembler::load() {
+    in >> rd;
+    in << addr;
+    machcode = format2( "00000", rd, "0", addr );
+    out << machcode << "\n";
 }
 
 void Assembler::loadi() {
+    in >> rd;
+    in << addr;
+    machcode = format2( "00000", rd, "1", addr );
+    out << machcode << "\n";
+    
 }
 
 void Assembler::store() {
+    in >> rd;
+    in << addr;
+    machcode = format2( "00001", rd, "0", addr );
+    out << machcode << "\n";
 }
 
 void Assembler::add() {
+    in >> rd;
+    in << rs
+    machcode = format1( "00010", rd, "0", rs );
+    out << machcode << "\n";
 }
 
 void Assembler::addi() {
+    in >> rd;
+    in << addr;
+    machcode = format2( "00010", rd, "1", addr );
+    out << machcode << "\n";
 }
 
 void Assembler::addc() {
+    in >> rd;
+    in << rs;
+    machcode = format1( "00011", rd, "0", rs );
+    out << machcode << "\n";
 }
 
 void Assembler::addci() {
+    in >> rd;
+    in << addr;
+    machcode = format2( "00011", rd, "1", addr );
+    out << machcode << "\n";
 }
 
 void Assembler::sub() {
+    in >> rd;
+    in << rs;
+    machcode = format1( "00100", rd, "0", rs );
+    out << machcode << "\n";
     
 }
 
 void Assembler::subi() {
+    in >> rd;
+    in << addr;
+    machcode = format2( "00100", rd, "1", addr );
+    out << machcode << "\n";
 }
 
 void Assembler::subc() {
+    in >> rd;
+    in << rs;
+    machcode = format1( "00101", rd, "0", rs );
+    out << machcode << "\n";
 }
 
 void Assembler::subci() {
+    in >> rd;
+    in << addr;
+    machcode = format2( "00101", rd, "1", addr );
+    out << machcode << "\n";
 }
 
 void Assembler::ander() {
+    in >> rd;
+    in << rs;
+    machcode = format1( "00110", rd, "0", rs );
+    out << machcode << "\n";
 }
 
 void Assembler::andi() {
+    in >> rd;
+    in << addr;
+    machcode = format2( "00110", rd, "1", addr );
+    out << machcode << "\n";
 }
 
 void Assembler::xorer() {
+    in >> rd;
+    in << rs;
+    machcode = format1( "00111", rd, "0", rs );
+    out << machcode << "\n";
 }
 
 void Assembler::xori() {
+    in >> rd;
+    in << addr;
+    machcode = format2( "00111", rd, "1", addr );
+    out << machcode << "\n";
 }
 
 void Assembler::negate() {
+    in >> rd;
+    machcode = format1( "0000", rd, "1", addr );
+    out << machcode << "\n";
 }
 
 void Assembler::shl() {
