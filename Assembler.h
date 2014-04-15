@@ -45,10 +45,9 @@ class Assembler {
 	void write();
 	void halt(); 
 	void noop();
- 
 private:
- 	typedef void (*pfunc)(string);
- 	map<string, pfunc> functions; // Will be mapped to the functions to call them
+	typedef void (Assembler::*function)();
+	map<string, function> functions;
  	fstream in, out; //One will be the .s file while the other will be the .o file 
  	string opcode;
  	int rd, rs, constant, addr, machcode; //Different parts of the instruction

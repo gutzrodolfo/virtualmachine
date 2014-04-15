@@ -10,7 +10,6 @@
 
 using namespace std;
 
-
 string dtb(int x, int sz){
 	string s = "";
 	while(x > 0){
@@ -92,17 +91,56 @@ int format2(string opcode, int rd, string i, int addr){
 	return btd(code);
 }
 
-
-
 // Implementation of Assembler functions
 
-Assembler::Assembler(string filename){
+Assembler::Assembler(string filename) {
 	in.open(filename + ".s");
 	out.open(filename + ".o");
+	typedef void (Assembler::*function)();
+	functions["load"] = &Assembler::load;
+	functions["loadi"] = &Assembler::loadi;
+	functions["store"] = &Assembler::store;
+	functions["add"] = &Assembler::add;
+	functions["addi"] = &Assembler::addi;
+	functions["addc"] = &Assembler::addc;
+	functions["addci"] = &Assembler::addci;
+	functions["sub"] = &Assembler::sub;
+	functions["subi"] = &Assembler::subi;
+	functions["subc"] = &Assembler::subc;
+	functions["subci"] = &Assembler::subci;
+	functions["and"] = &Assembler::ander;
+	functions["andi"] = &Assembler::andi;
+	functions["xor"] = &Assembler::xorer;
+	functions["xori"] = &Assembler::xori;
+	functions["compl"] = &Assembler::negate;
+	functions["shl"] = &Assembler::shl;
+	functions["shla"] = &Assembler::shla;
+	functions["shr"] = &Assembler::shr;
+	functions["shra"] = &Assembler::shra;
+	functions["compr"] = &Assembler::compr;
+	functions["compri"] = &Assembler::compri;
+	functions["getstat"] = &Assembler::getstat;
+	functions["putstat"] = &Assembler::putstat;
+	functions["jump"] = &Assembler::jump;
+	functions["jumpl"] = &Assembler::jumpl;
+	functions["jumpe"] = &Assembler::jumpe;
+	functions["jumpg"] = &Assembler::jumpg;
+	functions["call"] = &Assembler::call;
+	functions["return"] = &Assembler::ret;
+	functions["read"] = &Assembler::read;
+	functions["write"] = &Assembler::write;
+	functions["halt"] = &Assembler::halt;
+	functions["noop"] = &Assembler::noop;
 }
 
 void Assembler::parse() {
+	while (!in.eof()) {
+		in >> opcode;
+		functions[opcode];
+		in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	}
 }
+
 
 void Assembler::load() {
 }
@@ -154,81 +192,81 @@ void Assembler::negate() {
 }
 
 void Assembler::shl() {
-	rd >> in;
+	in >> rd;
 	machcode = format1( "01001", rd, "0", 0 );
 	out << machcode << "\n";
 }
 
 void Assembler::shla() {
-	rd >> in;
+	in >> rd;
 	machcode = format1( "01010", rd, "0", 0 );
 	out << machcode << "\n";
 }
 
 void Assembler::shr() {
-	rd >> in;
+	in >> rd;
 	machcode = format1( "01011", rd, "0", 0 );
 	out << machcode << "\n";
 }
 
 void Assembler::shra() {
-	rd >> in;
+	in >> rd;
 	machcode = format1( "01010", rd, "0", 0 );
 	out << machcode << "\n";
 }
 
 void Assembler::compr() {
-	rd >> in;
-	rs << in;
+	in >> rd;
+	in << rs;
 	machcode = format1( "01101", rd, "0", rs );
 	out << machcode << "\n";
 }
 
 void Assembler::compri() {
-	rd >> in;
-	addr << in;
+	in >> rd;
+	in << addr;
 	machcode = format2( "01101", rd, "1", addr );
 	out << machcode << "\n";
 }
 
 void Assembler::getstat() {
-	rd >> in;
+	in >> rd;
 	machcode = format1( "01110", rd, "0", 0 );
 	out << machcode << "\n";
 }
 
 void Assembler::putstat() {
-	rd >> in;
+	in >> rd;
 	machcode = format1( "01111", rd, "0", 0 );
 	out << machcode << "\n";
 }
 
 void Assembler::jump() {
-	addr >> in;
+	in >> addr;
 	machcode = format2( "10000", 0, "0", addr );
 	out << machcode << "\n";
 }
 
 void Assembler::jumpl() {
-	addr >> in;
+	in >> addr;
 	machcode = format2( "10001", 0, "0", addr );
 	out << machcode << "\n";
 }
 
 void Assembler::jumpe() {
-	addr >> in;
+	in >> addr;
 	machcode = format2( "10010", 0, "0", addr );
 	out << machcode << "\n";
 }
 
 void Assembler::jumpg() {
-	addr >> in;
+	in >> addr;
 	machcode = format2( "10011", 0, "0", addr );
 	out << machcode << "\n";
 }
 
 void Assembler::call() {
-	addr >> in;
+	in >> addr;
 	machcode = format1( "10100", 0, "0", addr );
 	out << machcode << "\n";
 }
@@ -239,13 +277,13 @@ void Assembler::ret() {
 }
 
 void Assembler::read() {
-	rd >> in;
+	in >> rd;
 	machcode = format1( "10110", rd, "0", 0 );
 	out << machcode << "\n";
 }
 
 void Assembler::write() {
-	rd >> in;
+	in >> rd;
 	machcode = format1( "10111", rd, "0", 0 );
 	out << machcode << "\n";
 }
