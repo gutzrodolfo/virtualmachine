@@ -1,1 +1,2 @@
-jump 10
+jump 10 !test
+halt
