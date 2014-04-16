@@ -148,14 +148,14 @@ void Assembler::parse() {
 
 void Assembler::load() {
     in >> rd;
-    in << addr;
+    in >>  addr;
     machcode = format2( "00000", rd, "0", addr );
     out << machcode << "\n";
 }
 
 void Assembler::loadi() {
     in >> rd;
-    in << addr;
+    in >>  addr;
     machcode = format2( "00000", rd, "1", addr );
     out << machcode << "\n";
     
@@ -163,42 +163,42 @@ void Assembler::loadi() {
 
 void Assembler::store() {
     in >> rd;
-    in << addr;
+    in >>  addr;
     machcode = format2( "00001", rd, "0", addr );
     out << machcode << "\n";
 }
 
 void Assembler::add() {
     in >> rd;
-    in << rs;
+    in >>  rs;
     machcode = format1( "00010", rd, "0", rs );
     out << machcode << "\n";
 }
 
 void Assembler::addi() {
     in >> rd;
-    in << addr;
+    in >>  addr;
     machcode = format2( "00010", rd, "1", addr );
     out << machcode << "\n";
 }
 
 void Assembler::addc() {
     in >> rd;
-    in << rs;
+    in >>  rs;
     machcode = format1( "00011", rd, "0", rs );
     out << machcode << "\n";
 }
 
 void Assembler::addci() {
     in >> rd;
-    in << addr;
+    in >>  addr;
     machcode = format2( "00011", rd, "1", addr );
     out << machcode << "\n";
 }
 
 void Assembler::sub() {
     in >> rd;
-    in << rs;
+    in >>  rs;
     machcode = format1( "00100", rd, "0", rs );
     out << machcode << "\n";
     
@@ -206,49 +206,49 @@ void Assembler::sub() {
 
 void Assembler::subi() {
     in >> rd;
-    in << addr;
+    in >>  addr;
     machcode = format2( "00100", rd, "1", addr );
     out << machcode << "\n";
 }
 
 void Assembler::subc() {
     in >> rd;
-    in << rs;
+    in >>  rs;
     machcode = format1( "00101", rd, "0", rs );
     out << machcode << "\n";
 }
 
 void Assembler::subci() {
     in >> rd;
-    in << addr;
+    in >>  addr;
     machcode = format2( "00101", rd, "1", addr );
     out << machcode << "\n";
 }
 
 void Assembler::ander() {
     in >> rd;
-    in << rs;
+    in >>  rs;
     machcode = format1( "00110", rd, "0", rs );
     out << machcode << "\n";
 }
 
 void Assembler::andi() {
     in >> rd;
-    in << addr;
+    in >>  addr;
     machcode = format2( "00110", rd, "1", addr );
     out << machcode << "\n";
 }
 
 void Assembler::xorer() {
     in >> rd;
-    in << rs;
+    in >>  rs;
     machcode = format1( "00111", rd, "0", rs );
     out << machcode << "\n";
 }
 
 void Assembler::xori() {
     in >> rd;
-    in << addr;
+    in >>  addr;
     machcode = format2( "00111", rd, "1", addr );
     out << machcode << "\n";
 }
@@ -285,14 +285,14 @@ void Assembler::shra() {
 
 void Assembler::compr() {
 	in >> rd;
-	in << rs;
+	in >>  rs;
 	machcode = format1( "01101", rd, "0", rs );
 	out << machcode << "\n";
 }
 
 void Assembler::compri() {
 	in >> rd;
-	in << addr;
+	in >>  addr;
 	machcode = format2( "01101", rd, "1", addr );
 	out << machcode << "\n";
 }
