@@ -48,7 +48,7 @@ class Assembler {
 private:
 	typedef void (Assembler::*function)();
 	map<string, function> functions;
- 	fstream in, out; //One will be the .s file while the other will be the .o file 
+ 	ifstream in; ofstream out; //One will be the .s file while the other will be the .o file 
  	string opcode;
  	int rd, rs, constant, addr, machcode; //Different parts of the instruction
 };

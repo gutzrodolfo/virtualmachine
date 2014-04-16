@@ -61,9 +61,10 @@ string dtb2(int x, int sz){
 
 int btd(string code){
 	int decimal = 0;
-	for(int i = code.size() - 1; i >= 0; i--) {
+	for(int i = 0; i < code.size(); i++) {
 		if(code[i] == '1'){
-			decimal += pow(2, i);
+			decimal += pow(2, code.size() - i - 1);
+			cout << decimal << endl;
 		}
 	}
 	return decimal;
@@ -82,15 +83,23 @@ int format1( string opcode, int rd, string i, int rs ) {
 int format2( string opcode, int rd, string i, int addr ) {
 	
     string RD, RS, ADDR, code;
-	RD = dtb(rd, 2);
-	
+	RD = dtb(rd, 1);
+	cout << RD << endl;
+	cout << i << endl;
+	cout << addr << " is the address" << endl;
     if ( i == "1" ) {
-		ADDR = dtb2(addr, 8);
+		ADDR = dtb2(addr, 7);
+		cout << ADDR << endl;
 	}
-	else {
-		ADDR = dtb(addr, 8);
+	else if (i == "0") {
+		//ADDR = dtb(addr, 7);
+		ADDR = "00001010";//Rudy the issue will get stuck here if I don't assign a value
+		cout << ADDR << endl;
 	}
 	code = opcode + RD + i + RS + ADDR;
+	cout << opcode << endl;
+	cout << ADDR << endl;
+	cout << code << endl;
 	return btd(code);
 }
 
@@ -139,9 +148,13 @@ Assembler::Assembler(string filename) {
 void Assembler::parse() {
 	while (!in.eof()) {
 		in >> opcode;
-		functions[opcode];
-		in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		cout << opcode << endl;
+		//(this->*functions["jump"])();
+    	(*this.*functions[opcode])();
+		//in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
+	cout << "Running" << endl;
+	out.close();
 }
 
 
@@ -169,7 +182,7 @@ void Assembler::store() {
 
 void Assembler::add() {
     in >> rd;
-    in << rs
+    in << rs;
     machcode = format1( "00010", rd, "0", rs );
     out << machcode << "\n";
 }
@@ -310,7 +323,9 @@ void Assembler::putstat() {
 
 void Assembler::jump() {
 	in >> addr;
+	cout << "Running jump" << endl;
 	machcode = format2( "10000", 0, "0", addr );
+	cout << machcode << endl;
 	out << machcode << "\n";
 }
 
