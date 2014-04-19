@@ -1,6 +1,9 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <fstream>
+
+using namespace std;
 
 class VirtualMachine {
 
@@ -9,11 +12,11 @@ private:
   static const int MEM_SIZE = 256;
   vector <int> r;
   vector <int> mem;
-  int pc, ir, sr, sp, clock, base, limit;
+  int pc, ir, sr, sp, clk, base, limit;
   string irb; //IR in binary form
   typedef void (VirtualMachine::*function)();
   map<string, function> functions;
-  ifstream o, in;
+  ifstream o; ifstream in;
   ofstream out;
 public:
   VirtualMachine(string filename);
