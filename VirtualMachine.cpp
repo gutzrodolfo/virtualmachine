@@ -69,17 +69,14 @@ VirtualMachine::VirtualMachine(string filename) {
 }
 
 void VirtualMachine::parse() {
-    //int i = 0;        
-    //
-    for(int i = 0; i < limit - 1; i++) {
-      ir = mem[i];
-      cout << i << " ";
+    for(pc = 0; pc < limit - 1; pc++) {
+      ir = mem[pc];
+      cout << pc << " ";
       irb = dtb(ir, 16);
-      cout << irb << endl;
+      cout << irb.substr(0, 5) << endl;
       (*this.*functions[irb.substr(0,5)])();
     }
     cout << limit;
-    pc++;
     out.close(); 
 }
 
@@ -93,7 +90,6 @@ void VirtualMachine::parse() {
   }
   void VirtualMachine::loadi() {
   	r[btd(irb.substr(5,2))] = btd2(irb.substr(8,8));
-    cout << r[btd(irb.substr(5,2))] << endl;
     clk += 1;
   }
   void VirtualMachine::store() {
@@ -106,8 +102,10 @@ void VirtualMachine::parse() {
       return;
     }
     char carry = '0';
+    cout << r[btd(irb.substr(5,2))] << endl;
     r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], r[btd(irb.substr(8,2))], carry);
     string temp = dtb(sr, 16);
+    cout << r[btd(irb.substr(5,2))] <<  " " << r[btd(irb.substr(8,2))] << endl;
     sr = btd(temp.substr(0,15) + carry);    
     clk += 1;
   }
@@ -291,7 +289,7 @@ void VirtualMachine::parse() {
   	mem[--sp] = r[3];
   	mem[--sp] = sr;
   	sp--;
-  	pc = btd(irb.substr(8,8));
+  	pc = btd(irb.substr(8,8)) - 1;
     clk += 4;
   }
   void VirtualMachine::ret() {

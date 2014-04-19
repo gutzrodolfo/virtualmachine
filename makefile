@@ -14,3 +14,4 @@ run:
 
 clean:
 	rm Assembler.o
+	rm VirtualMachine.o

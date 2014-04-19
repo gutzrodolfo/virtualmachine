@@ -1,6 +1,7 @@
 #include <math.h>
 #include <string>
 #include <sstream>
+#include <iostream>
 
 string dtb(int x, int sz){
 	string s = "";
@@ -64,14 +65,30 @@ int btd(string code){
 
 int btd2(string code){
 	int decimal = 0;
-	for(int i = 1; i < code.size(); i++) {
-		if(code[i] == '1'){
-			decimal += pow(2, code.size() - i - 1);
+	if (code[0] == '0') {
+		return btd(code);
+	}
+	else {
+		for (int i = 0; i < code.size(); i++) {
+			if(code[i] == '1') { 
+				code[i] = '0';
+			}
+			else {
+				code[i] = '1';
+			}
+		}
+		//Add 1 to the code
+		for(int i = code.size() - 1; i >= 0; i--) {
+			if(code[i] == '0') {
+				code[i] = '1';
+				break;
+			}
+			else {
+				code[i] = '0';
+			}
 		}
 	}
-	if (code[0] == '1') {
-		decimal *= -1;
-	}
+	decimal = -btd(code);
 	return decimal;
 }
 
@@ -80,24 +97,22 @@ int adder(int x, int y, char &i) {
 	string b = dtb2(y, 16);
 	string out = "0000000000000000";
 	int carry = '0';
-	reverse(a.begin(), a.end());
-	reverse(b.begin(), b.end());
 	for (int i = 0; i < 16; i++) {
-		if(carry == '1' and a[i] == '0' and b[i] == '0') {
+		if(carry == '1' and a[15 - i] == '0' and b[15 - i] == '0') {
 			out[i] = '1'; 
 			carry = '0';
 		}
-		else if(carry == '0' and a[i] == '1' and b[i] == '0') {
+		else if(carry == '0' and a[15 - i] == '1' and b[15 - i] == '0') {
 			out[i] = '1'; 
 		}
-		else if(carry == '0' and a[i] == '0' and b[i] == '1') {
+		else if(carry == '0' and a[15 - i] == '0' and b[15 - i] == '1') {
 			out[i] = '1'; 
 		}
-		else if(carry == '1' and a[i] == '1' and b[i] == '1') {
+		else if(carry == '1' and a[15 - i] == '1' and b[15 - i] == '1') {
 			out[i] = '1';
 			carry = '1'; 
 		}
-		else if(carry == '0' and a[i] == '1' and b[i] == '1') {
+		else if(carry == '0' and a[15 - i] == '1' and b[15 - i] == '1') {
 			out[i] = '0';
 			carry = '1';
 		}
@@ -106,5 +121,6 @@ int adder(int x, int y, char &i) {
 		}
 	}
 	i = carry;
+	reverse(out.begin(), out.end());
 	return btd2(out);
 }

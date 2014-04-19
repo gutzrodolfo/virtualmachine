@@ -79,6 +79,10 @@ Assembler::Assembler(string filename) {
 void Assembler::parse() {
 	while (!in.eof()) {
 		in >> opcode;
+		if(opcode == "!") {
+			in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			continue;
+		}
     	(*this.*functions[opcode])();
 		in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
@@ -276,7 +280,7 @@ void Assembler::jumpg() {
 
 void Assembler::call() {
 	in >> addr;
-	machcode = format1( "10100", 0, "0", addr );
+	machcode = format2( "10100", 0, "0", addr);
 	out << machcode << "\n";
 }
 
