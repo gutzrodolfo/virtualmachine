@@ -10,6 +10,7 @@ private:
   vector <int> r;
   vector <int> mem;
   int pc, ir, sr, sp, clock, base, limit;
+  string irb; //IR in binary form
   typedef void (VirtualMachine::*function)();
   map<string, function> functions;
   ifstream o, in;
