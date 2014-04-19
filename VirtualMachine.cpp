@@ -3,6 +3,7 @@
 #include <map>
 #include <fstream>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -22,27 +23,27 @@ VirtualMachine::VirtualMachine(string filename) {
 
   typedef void (VirtualMachine::*function)();
 	functions["00000"] = &VirtualMachine::load;
-	//functions["loadi"] = &VirtualMachine::loadi; Not needed as "I" will call it
+	functions["loadi"] = &VirtualMachine::loadi; //Not needed as "I" will call it
 	functions["00001"] = &VirtualMachine::store;
 	functions["00010"] = &VirtualMachine::add;
-	//functions["addi"] = &VirtualMachine::addi;
+	functions["addi"] = &VirtualMachine::addi;
 	functions["00011"] = &VirtualMachine::addc;
-	//functions["addci"] = &VirtualMachine::addci;
+	functions["addci"] = &VirtualMachine::addci;
 	functions["00100"] = &VirtualMachine::sub;
-	//functions["subi"] = &VirtualMachine::subi;
+	functions["subi"] = &VirtualMachine::subi;
 	functions["00101"] = &VirtualMachine::subc;
-	//functions["subci"] = &VirtualMachine::subci;
+	functions["subci"] = &VirtualMachine::subci;
 	functions["00110"] = &VirtualMachine::ander;
-	//functions["andi"] = &VirtualMachine::andi;
+	functions["andi"] = &VirtualMachine::andi;
 	functions["00111"] = &VirtualMachine::xorer;
-	//functions["xori"] = &VirtualMachine::xori;
+	functions["xori"] = &VirtualMachine::xori;
 	functions["01000"] = &VirtualMachine::negate;
 	functions["01001"] = &VirtualMachine::shl;
 	functions["01010"] = &VirtualMachine::shla;
 	functions["01011"] = &VirtualMachine::shr;
 	functions["01100"] = &VirtualMachine::shra;
 	functions["01101"] = &VirtualMachine::compr;
-	//functions["compri"] = &VirtualMachine::compri;
+	functions["compri"] = &VirtualMachine::compri;
 	functions["01110"] = &VirtualMachine::getstat;
 	functions["01111"] = &VirtualMachine::putstat;
 	functions["10000"] = &VirtualMachine::jump;
@@ -55,25 +56,30 @@ VirtualMachine::VirtualMachine(string filename) {
 	functions["10111"] = &VirtualMachine::write;
 	functions["11000"] = &VirtualMachine::halt;
 	functions["11001"] = &VirtualMachine::noop;
+  int i = 0;        
+  while (!o.eof()) {
+    int x;
+    o >> x;
+    o.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    mem[i] = x;
+    limit++;
+    i++;
+  }
+  o.close();
 }
 
 void VirtualMachine::parse() {
-    int i = 0;        
-    while (!o.eof()) {
-      int x;
-      o >> x;
-      mem[i] = x;
-      string temp = dtb(mem[i], 16);  // convert unsigned int to bin and
-                                      // store in temp string 
-      string temp2 = temp.substr(0,5)
-
-      (*this.*functions[temp2])();
-      in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-      limit++;
-      i++;
-      temp =  ""; // clear strings
-      temp2 = ""; 
+    //int i = 0;        
+    //
+    for(int i = 0; i < limit - 1; i++) {
+      ir = mem[i];
+      cout << i << " ";
+      irb = dtb(ir, 16);
+      cout << irb << endl;
+      (*this.*functions[irb.substr(0,5)])();
     }
+    cout << limit;
+    pc++;
     out.close(); 
 }
 
@@ -87,6 +93,7 @@ void VirtualMachine::parse() {
   }
   void VirtualMachine::loadi() {
   	r[btd(irb.substr(5,2))] = btd2(irb.substr(8,8));
+    cout << r[btd(irb.substr(5,2))] << endl;
     clk += 1;
   }
   void VirtualMachine::store() {

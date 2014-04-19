@@ -83,6 +83,7 @@ void Assembler::parse() {
 		in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
 	out.close();
+	in.close();
 }
 
 
