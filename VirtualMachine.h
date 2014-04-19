@@ -1,3 +1,4 @@
+
 #include <vector>
 #include <string>
 #include <map>
@@ -21,6 +22,7 @@ private:
 public:
   VirtualMachine(string filename);
   //These are all available operation by the VM
+  void parse(); 
   void load();
   void loadi();
   void store();

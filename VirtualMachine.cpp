@@ -8,27 +8,19 @@ using namespace std;
 
 VirtualMachine::VirtualMachine(string filename) {
 	//Initialize all values 
-	r = vector <int> (REG_FILE_SIZE);
+	  r = vector <int> (REG_FILE_SIZE);
     mem = vector <int> (MEM_SIZE);
     pc = 0;  base = 0; sr = 0; sp = 255; ir = 0;  clk = 0; limit = 0;
     //Open files and load memory
     o.open(filename + ".o");
     in.open(filename + ".in");
     out.open(filename + ".out");
-    int i = 0;
-    while (!o.eof()) {
-    	int x;
-    	o >> x;
-    	mem[i] = x;
-    	limit++;
-      i++;
-    }
-    
+
     //Now load the map pointers to map the functions using the opcodes
     //Some will not be needed to be added here as the immediate bit needs
     //Be checked first
 
-    typedef void (VirtualMachine::*function)();
+  typedef void (VirtualMachine::*function)();
 	functions["00000"] = &VirtualMachine::load;
 	//functions["loadi"] = &VirtualMachine::loadi; Not needed as "I" will call it
 	functions["00001"] = &VirtualMachine::store;
@@ -63,6 +55,26 @@ VirtualMachine::VirtualMachine(string filename) {
 	functions["10111"] = &VirtualMachine::write;
 	functions["11000"] = &VirtualMachine::halt;
 	functions["11001"] = &VirtualMachine::noop;
+}
+
+void VirtualMachine::parse() {
+    int i = 0;        
+    while (!o.eof()) {
+      int x;
+      o >> x;
+      mem[i] = x;
+      string temp = dtb(mem[i], 16);  // convert unsigned int to bin and
+                                      // store in temp string 
+      string temp2 = temp.substr(0,5)
+
+      (*this.*functions[temp2])();
+      in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      limit++;
+      i++;
+      temp =  ""; // clear strings
+      temp2 = ""; 
+    }
+    out.close(); 
 }
 
   void VirtualMachine::load() {
