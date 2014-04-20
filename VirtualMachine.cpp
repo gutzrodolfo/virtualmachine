@@ -18,9 +18,9 @@ using namespace std;
 
 VirtualMachine::VirtualMachine(string filename) {
 /************************************************************
-The VM constructore needs to be initialized by startiing the
-clock, memory, and all the registers. Additionally this needs
-to have input and output. Finally it needs some instructions.
+The VM constructor needs to be initialized by startiing the
+clock, memory, and all the registers. Additionally, this needs
+to have input and output. Finally, it needs some instructions.
 *************************************************************/
 	r = vector <int> (REG_FILE_SIZE);
   mem = vector <int> (MEM_SIZE);
@@ -36,7 +36,7 @@ through map pointers it should be noted that
 not all functions are included here as they 
 use the immediate bit and it was more
 convenient to call through the corresponding
-none immediate function.
+non-immediate function.
 ********************************************/
 typedef void (VirtualMachine::*function)();
 functions["00000"] = &VirtualMachine::load;
