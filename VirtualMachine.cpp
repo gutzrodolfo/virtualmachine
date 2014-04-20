@@ -330,6 +330,7 @@ void VirtualMachine::jumpg() {
 clk += 1;
 }
 void VirtualMachine::call() {
+ assert(sp <=256 or sp >= limit + 6);
  mem[sp] = pc;
  mem[--sp] = r[0];
  mem[--sp] = r[1];

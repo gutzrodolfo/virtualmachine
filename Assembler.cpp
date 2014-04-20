@@ -15,6 +15,7 @@ Assembler.cpp
 #include <Algorithm>
 #include <sstream>
 #include "conversions.h"
+#include <cassert>
 
 using namespace std;
 
@@ -27,6 +28,7 @@ using namespace std;
 int format1( string opcode, int rd, string i, int rs ) {
 	
     string RD, RS, code;
+    assert(rd >= 0 or rd <= 3 or rs >= 0 or rd <= 3);
 	RD = dtb( rd, 2 ); RS = dtb( rs, 2 );
 	code = opcode + RD + i + RS + "000000";
 	return btd( code );
@@ -34,15 +36,17 @@ int format1( string opcode, int rd, string i, int rs ) {
 
 int format2( string opcode, int rd, string i, int addr ) {
 	
-    string RD, RS, ADDR, code;
+    string RD, ADDR, code;
 	RD = dtb(rd, 2);
     if ( i == "1" ) {
 		ADDR = dtb2(addr, 8);
+		assert(rd >= 0 or rd <= 3 or addr >= -128 or addr <= 128);
 	}
 	else if (i == "0") {
 		ADDR = dtb(addr, 8);
+		assert(rd >= 0 or rd <= 3 or addr >= 0 or addr <= 256);
 	}
-	code = opcode + RD + i + RS + ADDR;
+	code = opcode + RD + i + ADDR;
 	return btd(code);
 }
 
