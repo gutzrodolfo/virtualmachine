@@ -59,5 +59,6 @@ private:
 	typedef void (Assembler::*function)();
 	map<string, function> functions;
  	ifstream in; ofstream out; 
+ 	string opcode;
  	int rd, rs, constant, addr, machcode; 
 };
