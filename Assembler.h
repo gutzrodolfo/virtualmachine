@@ -1,3 +1,12 @@
+/**********************************************
+Phase 1 Project
+Groupmates: Eli Gonzalez & Rodolfo Gutierrez
+Date: 	    04/21/2014
+Class:	    CSE 460 
+
+Assembler.h
+**********************************************/
+
 #include <vector>
 #include <iostream>
 #include <map>
@@ -7,10 +16,10 @@
 using namespace std;
 
 class Assembler {
+ 
  public:
-	
-    Assembler(string filename);//Argument will be passed from the os.cpp file
-	void parse();// Will go through the a file to output the .o file
+    Assembler(string filename);
+	void parse();
 	void load();
 	void loadi();
 	void store();
@@ -45,10 +54,10 @@ class Assembler {
 	void write();
 	void halt(); 
 	void noop();
+
 private:
 	typedef void (Assembler::*function)();
 	map<string, function> functions;
- 	ifstream in; ofstream out; //One will be the .s file while the other will be the .o file 
- 	string opcode;
- 	int rd, rs, constant, addr, machcode; //Different parts of the instruction
+ 	ifstream in; ofstream out; 
+ 	int rd, rs, constant, addr, machcode; 
 };
