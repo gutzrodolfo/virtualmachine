@@ -1,3 +1,12 @@
+/**********************************************
+Phase 1 Project
+Groupmates: Eli Gonzalez & Rodolfo Gutierrez
+Date: 	 04/21/2014
+Class:	 CSE 460 
+
+Assembler.cpp
+**********************************************/
+
 #include <vector>
 #include <iostream>
 #include <map>
@@ -10,7 +19,11 @@
 
 using namespace std;
 
-// Instruction format functions
+/***************************************************
+ format1 & format2 functions simplify the translation 
+ of their respective instruction formats. For use in 
+ the assembly functions. 
+***************************************************/
 
 int format1( string opcode, int rd, string i, int rs ) {
 	
@@ -34,7 +47,10 @@ int format2( string opcode, int rd, string i, int addr ) {
 	return btd(code);
 }
 
-// Implementation of Assembler functions
+/*******************************************************
+ Loads map pointers to map functions using corresponding
+ string opcodes. 
+*******************************************************/
 
 Assembler::Assembler(string filename) {
 	in.open(filename + ".s");
@@ -76,6 +92,11 @@ Assembler::Assembler(string filename) {
 	functions["noop"] = &Assembler::noop;
 }
 
+/*********************************************************
+ Reads assembly file and initializes the appropriate assembly
+ function.  
+********************************************************/
+
 void Assembler::parse() {
 	while (!in.eof()) {
 		in >> opcode;
@@ -90,6 +111,9 @@ void Assembler::parse() {
 	in.close();
 }
 
+/***********************************************
+ Implementation of Assembler functions
+************************************************/
 
 void Assembler::load() {
     in >> rd;
@@ -301,12 +325,16 @@ void Assembler::write() {
 	out << machcode << "\n";
 }
 
+/**************************************************************
+ As  halt & no-op only require 
+ the opcodes, 0's are placed in the rest. 
+***************************************************************/
+
 void Assembler::halt() {
-	machcode = format1( "11000", 0, "0", 0 ); //As  no-op only requires the opcode 0's are placed in the rest
+	machcode = format1( "11000", 0, "0", 0 ); 
 	out << machcode << "\n";
 }
 
 void Assembler::noop() {
-	machcode = format1( "11001", 0, "0", 0 ); //As  no-op only requires the opcode 0's are placed in the rest
-	out << machcode << "\n";
+	machcode = format1( "11001", 0, "0", 0 ); 
 }
