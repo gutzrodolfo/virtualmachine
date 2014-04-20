@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <cassert>
 
 using namespace std;
 
@@ -71,12 +72,17 @@ VirtualMachine::VirtualMachine(string filename) {
 void VirtualMachine::parse() {
     for(pc = 0; pc < limit - 1; pc++) {
       ir = mem[pc];
-      cout << pc << " ";
+      cout << pc + 1 << " "; //Display line number in instructions
       irb = dtb(ir, 16);
-      cout << irb.substr(0, 5) << endl;
+      //cout << irb.substr(0, 5) << endl;
       (*this.*functions[irb.substr(0,5)])();
+      cout << "Register 0 = " << r[0] << " ";
+      cout << "Register 1 = " << r[1] << " ";
+      cout << "Register 2 = " << r[2] << " ";
+      cout << "Register 3 = " << r[3] << endl;
     }
-    cout << limit;
+    //cout << limit;
+    in.close();
     out.close(); 
 }
 
@@ -203,18 +209,34 @@ void VirtualMachine::parse() {
     clk += 1;
   }
   void VirtualMachine::shl() {
+    string temp = dtb(r[btd(irb.substr(5,2))], 16);
+    if (temp[0] == '1') {
+      sr = btd(temp.substr(0,14) + "1");
+    }
     r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] << 1;
     clk += 1;
   }
   void VirtualMachine::shla() {
+    string temp = dtb(r[btd(irb.substr(5,2))], 16);
+    if (temp[1] == '1') {
+      sr = btd(temp.substr(0,14) + "1");
+    }
     r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] /= 2;
     clk += 1;
   }
   void VirtualMachine::shr() {
+    string temp = dtb(r[btd(irb.substr(5,2))], 16);
+    if (temp[0] == '1') {
+      sr = btd(temp.substr(0,14) + "1");
+    }
     r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] >> 1;
     clk += 1;
   }
   void VirtualMachine::shra() {
+    string temp = dtb(r[btd(irb.substr(5,2))], 16);
+    if (temp[1] == '1') {
+      sr = btd(temp.substr(0,14) + "1");
+    }
     r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] *= 2;
     clk += 1;
   }
@@ -250,6 +272,7 @@ void VirtualMachine::parse() {
   }
   void VirtualMachine::getstat() {
   	r[btd(irb.substr(5,2))] = sr;
+    assert(r[btd(irb.substr(5,2))] = sr);
     clk += 1;
   }
   void VirtualMachine::putstat() {
@@ -257,27 +280,27 @@ void VirtualMachine::parse() {
     clk += 1;
   }
   void VirtualMachine::jump() {
-  	pc = mem[btd(irb.substr(8,8))];
+  	pc = btd(irb.substr(8,8)) - 1;
     clk += 1;
   }
   void VirtualMachine::jumpl() {
   	string temp = dtb(sr, 16);
   	if (temp[12] == '1') {
-  		pc = mem[btd(irb.substr(8,8))];
+  		pc = btd(irb.substr(8,8)) - 1;
   	}
     clk += 1;
   }
   void VirtualMachine::jumpe() {
   	string temp = dtb(sr, 16);
   	if (temp[13] == '1') {
-  		pc = mem[btd(irb.substr(8,8))];
+  		pc = btd(irb.substr(8,8)) - 1;
   	}
     clk += 1;
   }
   void VirtualMachine::jumpg() {
   	string temp = dtb(sr, 16);
   	if (temp[14] == '1') {
-  		pc = mem[btd(irb.substr(8,8))];
+  		pc = btd(irb.substr(8,8)) - 1;
   	}  	
     clk += 1;
   }
@@ -311,7 +334,7 @@ void VirtualMachine::parse() {
   }
   void VirtualMachine::halt()  {
   	pc = limit;
-  	out << "The clock count was: "  << clk << endl;
+  	out << "The clock count is: "  << clk << endl;
     clk += 1;
   } 
   void VirtualMachine::noop() {
