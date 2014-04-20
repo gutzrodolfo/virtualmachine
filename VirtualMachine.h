@@ -1,4 +1,11 @@
+/**********************************************
+Phase 1 Project
+Groupmates: Eli Gonzalez & Rodolfo Gutierrez
+Date:       04/21/2014
+Class:      CSE 460 
 
+VirtualMachine.h
+**********************************************/
 #include <vector>
 #include <string>
 #include <map>
@@ -58,5 +65,3 @@ public:
   void halt(); 
   void noop();
 };
-
-  

@@ -6,18 +6,18 @@ Class:	    CSE 460
 
 Conversions.h
 **********************************************/
-
 #include <math.h>
 #include <string>
 #include <sstream>
 #include <iostream>
 
+using namespace std;
 /*****************************************
  Decimal to binary function for POSTIVE int values. 
  Return type is a string. 
 ******************************************/ 
 
-string dtb(int x, int sz){
+inline string dtb(int x, int sz){
 	string s = "";
 	while(x > 0){
 		int bin = x % 2;
@@ -40,7 +40,7 @@ string dtb(int x, int sz){
  Return type is a string. 
 ******************************************/ 
 
-string dtb2(int x, int sz){
+inline string dtb2(int x, int sz){
 	if(x >= 0){
 		return dtb(x, sz);    // If positive, call decimal to binary. 
 	}
@@ -82,7 +82,7 @@ string dtb2(int x, int sz){
  a an int. 
 ******************************************/ 
 
- int btd(string code){
+ inline int btd(string code){
 	int decimal = 0;
 	for(int i = 0; i < code.size(); i++) {
 		if(code[i] == '1'){
@@ -92,7 +92,7 @@ string dtb2(int x, int sz){
 	return decimal;
 }
 
-int btd2(string code){
+inline int btd2(string code){
 	int decimal = 0;
 	if (code[0] == '0') {
 		return btd(code);
@@ -123,7 +123,7 @@ int btd2(string code){
 	return decimal;
 }
 
-int adder( int x, int y, char &i ) {
+inline int adder( int x, int y, char &i ) {
 	string a = dtb2(x, 16);
 	string b = dtb2(y, 16);
 	string out = "0000000000000000";
