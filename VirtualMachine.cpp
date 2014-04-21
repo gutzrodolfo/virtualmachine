@@ -141,7 +141,7 @@ void VirtualMachine::add() {
 }
 void VirtualMachine::addi() {
   char carry = '0';
-  overflow(r[btd(irb.substr(5,2))], btd2(irb.substr(8,8));
+  overflow(r[btd(irb.substr(5,2))], btd2(irb.substr(8,8)));
     r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], btd2(irb.substr(8,8)), carry);
     string temp = dtb(sr, 16);
     sr = btd(temp.substr(0,15) + carry); 
@@ -247,31 +247,43 @@ void VirtualMachine::addi() {
   if (temp[0] == '1') {
     sr = btd(temp.substr(0,14) + "1");
   }
+  else {
+    sr = btd(temp.substr(0,14) + "0");
+  }
   r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] << 1;
   clk += 1;
 }
 void VirtualMachine::shla() {
   string temp = dtb(r[btd(irb.substr(5,2))], 16);
-  if (temp[1] == '1') {
+  if (temp[0] == '1') {
     sr = btd(temp.substr(0,14) + "1");
   }
-  r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] /= 2;
+  else {
+    sr = btd(temp.substr(0,14) + "0");
+  }
+  r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] *= 2;
   clk += 1;
 }
 void VirtualMachine::shr() {
   string temp = dtb(r[btd(irb.substr(5,2))], 16);
-  if (temp[0] == '1') {
+  if (temp[15] == '1') {
     sr = btd(temp.substr(0,14) + "1");
+  }
+  else {
+    sr = btd(temp.substr(0,14) + "0");
   }
   r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] >> 1;
   clk += 1;
 }
 void VirtualMachine::shra() {
   string temp = dtb(r[btd(irb.substr(5,2))], 16);
-  if (temp[1] == '1') {
+  if (temp[15] == '1') {
     sr = btd(temp.substr(0,14) + "1");
   }
-  r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] *= 2;
+  else {
+    sr = btd(temp.substr(0,14) + "0");
+  }  
+  r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] /= 2;
   clk += 1;
 }
 void VirtualMachine::compr() {
@@ -306,7 +318,7 @@ clk += 1;
 }
 void VirtualMachine::getstat() {
  r[btd(irb.substr(5,2))] = sr;
- assert(r[btd(irb.substr(5,2))] = sr);
+ assert(r[btd(irb.substr(5,2))] == sr);
  clk += 1;
 }
 void VirtualMachine::putstat() {
@@ -377,6 +389,7 @@ void VirtualMachine::noop() {
   return;
 }
 void VirtualMachine::overflow(int x, int y) {
+  string temp = dtb(sr, 16);
   if(x <= 0 and -y <= 0) {
     return;
   }
