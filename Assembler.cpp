@@ -28,7 +28,7 @@ using namespace std;
 int format1( string opcode, int rd, string i, int rs ) {
 	
     string RD, RS, code;
-    assert(rd >= 0 or rd <= 3 or rs >= 0 or rd <= 3);
+    assert(rd >= 0 and rd <= 3 and rs >= 0 and rd <= 3);
 	RD = dtb( rd, 2 ); RS = dtb( rs, 2 );
 	code = opcode + RD + i + RS + "000000";
 	return btd( code );
@@ -40,11 +40,11 @@ int format2( string opcode, int rd, string i, int addr ) {
 	RD = dtb(rd, 2);
     if ( i == "1" ) {
 		ADDR = dtb2(addr, 8);
-		assert(rd >= 0 or rd <= 3 or addr >= -128 or addr <= 128);
+		assert(rd >= 0 and rd <= 3 and addr >= -128 and addr <= 128);
 	}
 	else if (i == "0") {
 		ADDR = dtb(addr, 8);
-		assert(rd >= 0 or rd <= 3 or addr >= 0 or addr <= 256);
+		assert(rd >= 0 and rd <= 3 and addr >= 0 and addr <= 256);
 	}
 	code = opcode + RD + i + ADDR;
 	return btd(code);

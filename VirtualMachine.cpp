@@ -22,12 +22,12 @@ The VM constructor needs to be initialized by startiing the
 clock, memory, and all the registers. Additionally, this needs
 to have input and output. Finally, it needs some instructions.
 *************************************************************/
-	r = vector <int> (REG_FILE_SIZE);
-  mem = vector <int> (MEM_SIZE);
-  pc = 0;  base = 0; sr = 0; sp = 255; ir = 0;  clk = 0; limit = 0;
-  o.open(filename + ".o");
-  in.open(filename + ".in");
-  out.open(filename + ".out");
+r = vector <int> (REG_FILE_SIZE);
+mem = vector <int> (MEM_SIZE);
+pc = 0;  base = 0; sr = 0; sp = 255; ir = 0;  clk = 0; limit = 0;
+o.open(filename + ".o");
+in.open(filename + ".in");
+out.open(filename + ".out");
 
 
 /********************************************
@@ -133,107 +133,116 @@ void VirtualMachine::add() {
     return;
   }
   char carry = '0';
-  cout << r[btd(irb.substr(5,2))] << endl;
+  overflow(r[btd(irb.substr(5,2))], r[btd(irb.substr(8,2))]);
   r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], r[btd(irb.substr(8,2))], carry);
   string temp = dtb(sr, 16);
-  cout << r[btd(irb.substr(5,2))] <<  " " << r[btd(irb.substr(8,2))] << endl;
   sr = btd(temp.substr(0,15) + carry);    
   clk += 1;
 }
 void VirtualMachine::addi() {
   char carry = '0';
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], btd2(irb.substr(8,8)), carry);
-  string temp = dtb(sr, 16);
-  sr = btd(temp.substr(0,15) + carry); 
-  clk += 1;
-}
-void VirtualMachine::addc() {
-  if (irb[7] == '1') {
-    addci();
-    return;
-  } 
-  char carry = '0';
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], r[btd(irb.substr(8,2))], carry);
-  string temp = dtb(sr, 16);
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], btd(temp.substr(15,1)), carry);
-  sr = btd(temp.substr(0,15) + carry); 
-  clk += 1;
-}
-void VirtualMachine::addci() {
-  char carry = '0';
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], btd2(irb.substr(8,8)), carry);
-  string temp = dtb(sr, 16);
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], btd(temp.substr(15,1)), carry);
-  sr = btd(temp.substr(0,15) + carry); 
-  clk += 1;
-}
-void VirtualMachine::sub() {
-  if (irb[7] == '1') {
-    subi();
-    return;
+  overflow(r[btd(irb.substr(5,2))], btd2(irb.substr(8,8));
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], btd2(irb.substr(8,8)), carry);
+    string temp = dtb(sr, 16);
+    sr = btd(temp.substr(0,15) + carry); 
+    clk += 1;
   }
-  char carry = '0';
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -r[btd(irb.substr(8,2))], carry);
-  string temp = dtb(sr, 16);
-  sr = btd(temp.substr(0,15) + carry);    
-  clk += 1;
-}
-void VirtualMachine::subi() {
-  char carry = '0';
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -btd2(irb.substr(8,8)), carry);
-  string temp = dtb(sr, 16);
-  sr = btd(temp.substr(0,15) + carry);     
-  clk += 1;
-}
-void VirtualMachine::subc() {
-  if (irb[7] == '1') {
-    subci();
-    return;
+  void VirtualMachine::addc() {
+    if (irb[7] == '1') {
+      addci();
+      return;
+    } 
+    char carry = '0';
+    overflow(r[btd(irb.substr(5,2))], r[btd(irb.substr(8,2))] );
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], r[btd(irb.substr(8,2))], carry);
+    string temp = dtb(sr, 16);
+    overflow(r[btd(irb.substr(5,2))], carry);
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], btd(temp.substr(15,1)), carry);
+    sr = btd(temp.substr(0,15) + carry); 
+    clk += 1;
   }
-  char carry = '0';
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -r[btd(irb.substr(8,2))], carry);
-  string temp = dtb(sr, 16);
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -btd(temp.substr(15,1)), carry);
-  sr = btd(temp.substr(0,15) + carry); 
-  clk += 1;
-}
-void VirtualMachine::subci() {
-  char carry = '0';
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -btd2(irb.substr(8,8)), carry);
-  string temp = dtb(sr, 16);
-  r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -btd(temp.substr(15,1)), carry);
-  sr = btd(temp.substr(0,15) + carry); 
-  clk += 1;
-}
-void VirtualMachine::ander() {
-  if (irb[7] == '1') {
-    andi();
-    return;
+  void VirtualMachine::addci() {
+    char carry = '0';
+    overflow(r[btd(irb.substr(5,2))], btd2(irb.substr(8,8)) );
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], btd2(irb.substr(8,8)), carry);
+    string temp = dtb(sr, 16);
+    overflow(r[btd(irb.substr(5,2))], carry);
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], btd(temp.substr(15,1)), carry);
+    sr = btd(temp.substr(0,15) + carry); 
+    clk += 1;
   }
-  r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] & r[btd(irb.substr(8,2))];
-  clk += 1;
-}
-void VirtualMachine::andi() {
-  r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] & btd2(irb.substr(8,8));
-  clk += 1;
-}
-void VirtualMachine::xorer() {
-  if (irb[7] == '1') {
-    xori();
-    return;
+  void VirtualMachine::sub() {
+    if (irb[7] == '1') {
+      subi();
+      return;
+    }
+    char carry = '0';
+    overflow(r[btd(irb.substr(5,2))], -r[btd(irb.substr(8,2))]);
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -r[btd(irb.substr(8,2))], carry);
+    string temp = dtb(sr, 16);
+    sr = btd(temp.substr(0,15) + carry);    
+    clk += 1;
   }
-  r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] ^ r[btd(irb.substr(8,2))];
-  clk += 1;
-}
-void VirtualMachine::xori() {
-  r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] ^ btd2(irb.substr(8,8));
-  clk += 1;
-}
-void VirtualMachine::negate() {
- r[btd(irb.substr(5,2))] = ~r[btd(irb.substr(5,2))];
- clk += 1;
-}
-void VirtualMachine::shl() {
+  void VirtualMachine::subi() {
+    char carry = '0';
+    overflow(r[btd(irb.substr(5,2))], - btd2(irb.substr(8,8)) );
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -btd2(irb.substr(8,8)), carry);
+    string temp = dtb(sr, 16);
+    sr = btd(temp.substr(0,15) + carry);     
+    clk += 1;
+  }
+  void VirtualMachine::subc() {
+    if (irb[7] == '1') {
+      subci();
+      return;
+    }
+    char carry = '0';
+    overflow(r[btd(irb.substr(5,2))], -r[btd(irb.substr(8,2))]);
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -r[btd(irb.substr(8,2))], carry);
+    string temp = dtb(sr, 16);
+    overflow(r[btd(irb.substr(5,2))], -carry);
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -btd(temp.substr(15,1)), carry);
+    sr = btd(temp.substr(0,15) + carry); 
+    clk += 1;
+  }
+  void VirtualMachine::subci() {
+    char carry = '0';
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -btd2(irb.substr(8,8)), carry);
+    string temp = dtb(sr, 16);
+    overflow(r[btd(irb.substr(5,2))], -carry);
+    r[btd(irb.substr(5,2))] = adder(r[btd(irb.substr(5,2))], -btd(temp.substr(15,1)), carry);
+    sr = btd(temp.substr(0,15) + carry); 
+    clk += 1;
+  }
+  void VirtualMachine::ander() {
+    if (irb[7] == '1') {
+      andi();
+      return;
+    }
+    r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] & r[btd(irb.substr(8,2))];
+    clk += 1;
+  }
+  void VirtualMachine::andi() {
+    r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] & btd2(irb.substr(8,8));
+    clk += 1;
+  }
+  void VirtualMachine::xorer() {
+    if (irb[7] == '1') {
+      xori();
+      return;
+    }
+    r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] ^ r[btd(irb.substr(8,2))];
+    clk += 1;
+  }
+  void VirtualMachine::xori() {
+    r[btd(irb.substr(5,2))] = r[btd(irb.substr(5,2))] ^ btd2(irb.substr(8,8));
+    clk += 1;
+  }
+  void VirtualMachine::negate() {
+   r[btd(irb.substr(5,2))] = ~r[btd(irb.substr(5,2))];
+   clk += 1;
+ }
+ void VirtualMachine::shl() {
   string temp = dtb(r[btd(irb.substr(5,2))], 16);
   if (temp[0] == '1') {
     sr = btd(temp.substr(0,14) + "1");
@@ -330,7 +339,7 @@ void VirtualMachine::jumpg() {
 clk += 1;
 }
 void VirtualMachine::call() {
- assert(sp <=256 or sp >= limit + 6);
+ assert(sp <=256 and sp >= limit + 6);
  mem[sp] = pc;
  mem[--sp] = r[0];
  mem[--sp] = r[1];
@@ -366,4 +375,28 @@ void VirtualMachine::halt()  {
 void VirtualMachine::noop() {
   clk += 1;
   return;
+}
+void VirtualMachine::overflow(int x, int y) {
+  if(x <= 0 and -y <= 0) {
+    return;
+  }
+  else if (x >= 0 and -y >= 0) {
+    return;
+  }
+  else if (x>= 0 and y >= 0) {
+    if(x + y == 65535) {
+      sr = btd(temp.substr(0,11) + "1" + temp.substr(13,3));
+    }
+    else {
+      return;
+    }
+  }
+  else if (x<= 0 and y <= 0) {
+    if(-x + -y == 65536) {
+      sr = btd(temp.substr(0,11) + "1" + temp.substr(13,3));
+    }
+    else {
+      return;
+    }
+  }    
 } 

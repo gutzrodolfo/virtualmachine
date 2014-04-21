@@ -1,11 +1,9 @@
-! main for factorial program
-        loadi  4 1     ! line 0, R0 = fact(R1)
+        loadi  0 1     ! line 0, R0 = fact(R1)
         read   1       ! input R1
         call   6       ! call fact
         load   0 33    ! receive result of fact
         write  0
         halt
-! fact function
         compri 1 1     ! line 6
         jumpe  14      ! jump over the recursive call to fact if
         jumpl  14      ! R1 is less than or equal 1
@@ -16,7 +14,6 @@
         load   0 33
         store  0 33    ! line 14, return R0 (result of fact)
         return
-! mult function
         loadi  2 8     ! line 16, init R2 (counter)
         loadi  3 0     ! init R3 (result of mult)
         shr    1       ! line 18 (loop), shift right multiplier set CARRY

@@ -64,4 +64,5 @@ public:
   void write();
   void halt(); 
   void noop();
+  void overflow(int, int);
 };
