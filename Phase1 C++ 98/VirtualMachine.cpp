@@ -12,7 +12,6 @@ VirtualMachine.cpp
 #include <fstream>
 #include <string>
 #include <iostream>
-#include <cassert>
 #include <limits>
 
 using namespace std;
@@ -95,16 +94,19 @@ parses through the instructions after they have been loaded on
 to the VM. It handle the program counter and call the 
 corresponding instruction.
 *************************************************************/
-void VirtualMachine::parse() {
+bool VirtualMachine::parse() {
   for(pc = 0; pc < limit - 1; pc++) {
     ir = mem[pc];
       //For testing purposes registers will be displayed all times
     irb = dtb(ir, 16);
     (*this.*functions[irb.substr(0,5)])();
+    if (error()) {
+      return true;
+    }
   }
-
   in.close();
-  out.close(); 
+  out.close();
+  return false; 
 }
 
 /************************************************************
@@ -321,7 +323,6 @@ clk += 1;
 }
 void VirtualMachine::getstat() {
  r[btd(irb.substr(5,2))] = sr;
- assert(r[btd(irb.substr(5,2))] == sr);
  clk += 1;
 }
 void VirtualMachine::putstat() {
@@ -354,7 +355,6 @@ void VirtualMachine::jumpg() {
 clk += 1;
 }
 void VirtualMachine::call() {
- assert(sp <=256 and sp >= limit + 6);
  mem[sp] = pc;
  mem[--sp] = r[0];
  mem[--sp] = r[1];
@@ -416,3 +416,10 @@ void VirtualMachine::overflow(int x, int y) {
     }
   }    
 } 
+bool VirtualMachine::error() {
+  if (!(sp <= 256 or sp >= limit + 6)) {
+    cout << "Warning the stack is overflowed! Not enough memory!\n";
+    return true;
+  }
+  return false;
+}

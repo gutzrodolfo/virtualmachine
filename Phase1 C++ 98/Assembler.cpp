@@ -15,7 +15,6 @@ Assembler.cpp
 #include <algorithm>
 #include <sstream>
 #include "conversions.h"
-#include <cassert>
 #include <limits>
 
 using namespace std;
@@ -29,7 +28,6 @@ using namespace std;
 int format1( string opcode, int rd, string i, int rs ) {
 	
     string RD, RS, code;
-    assert(rd >= 0 and rd <= 3 and rs >= 0 and rd <= 3);
 	RD = dtb( rd, 2 ); RS = dtb( rs, 2 );
 	code = opcode + RD + i + RS + "000000";
 	return btd( code );
@@ -41,11 +39,9 @@ int format2( string opcode, int rd, string i, int addr ) {
 	RD = dtb(rd, 2);
     if ( i == "1" ) {
 		ADDR = dtb2(addr, 8);
-		assert(rd >= 0 and rd <= 3 and addr >= -128 and addr <= 128);
 	}
 	else if (i == "0") {
 		ADDR = dtb(addr, 8);
-		assert(rd >= 0 and rd <= 3 and addr >= 0 and addr <= 256);
 	}
 	code = opcode + RD + i + ADDR;
 	return btd(code);
@@ -103,7 +99,7 @@ Assembler::Assembler(string filename) {
  function.  
 ********************************************************/
 
-void Assembler::parse() {
+bool Assembler::parse() {
 	while (!in.eof()) {
 		in >> opcode;
 		if(opcode == "!") {
@@ -112,9 +108,14 @@ void Assembler::parse() {
 		}
     	(*this.*functions[opcode])();
 		in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		if (error()) {
+			break;
+			return false;
+		}
 	}
 	out.close();
 	in.close();
+	return true;
 }
 
 /***********************************************
@@ -130,8 +131,8 @@ void Assembler::load() {
 
 void Assembler::loadi() {
     in >> rd;
-    in >>  addr;
-    machcode = format2( "00000", rd, "1", addr );
+    in >>  constant;
+    machcode = format2( "00000", rd, "1", constant );
     out << machcode << "\n";
     
 }
@@ -152,8 +153,8 @@ void Assembler::add() {
 
 void Assembler::addi() {
     in >> rd;
-    in >>  addr;
-    machcode = format2( "00010", rd, "1", addr );
+    in >>  constant;
+    machcode = format2( "00010", rd, "1", constant );
     out << machcode << "\n";
 }
 
@@ -166,8 +167,8 @@ void Assembler::addc() {
 
 void Assembler::addci() {
     in >> rd;
-    in >>  addr;
-    machcode = format2( "00011", rd, "1", addr );
+    in >>  constant;
+    machcode = format2( "00011", rd, "1", constant );
     out << machcode << "\n";
 }
 
@@ -181,8 +182,8 @@ void Assembler::sub() {
 
 void Assembler::subi() {
     in >> rd;
-    in >>  addr;
-    machcode = format2( "00100", rd, "1", addr );
+    in >>  constant;
+    machcode = format2( "00100", rd, "1", constant );
     out << machcode << "\n";
 }
 
@@ -195,8 +196,8 @@ void Assembler::subc() {
 
 void Assembler::subci() {
     in >> rd;
-    in >>  addr;
-    machcode = format2( "00101", rd, "1", addr );
+    in >>  constant;
+    machcode = format2( "00101", rd, "1", constant );
     out << machcode << "\n";
 }
 
@@ -209,8 +210,8 @@ void Assembler::ander() {
 
 void Assembler::andi() {
     in >> rd;
-    in >>  addr;
-    machcode = format2( "00110", rd, "1", addr );
+    in >>  constant;
+    machcode = format2( "00110", rd, "1", constant );
     out << machcode << "\n";
 }
 
@@ -223,8 +224,8 @@ void Assembler::xorer() {
 
 void Assembler::xori() {
     in >> rd;
-    in >>  addr;
-    machcode = format2( "00111", rd, "1", addr );
+    in >>  constant;
+    machcode = format2( "00111", rd, "1", constant );
     out << machcode << "\n";
 }
 
@@ -267,8 +268,8 @@ void Assembler::compr() {
 
 void Assembler::compri() {
 	in >> rd;
-	in >>  addr;
-	machcode = format2( "01101", rd, "1", addr );
+	in >>  constant;
+	machcode = format2( "01101", rd, "1", constant );
 	out << machcode << "\n";
 }
 
@@ -343,4 +344,29 @@ void Assembler::halt() {
 
 void Assembler::noop() {
 	machcode = format1( "11001", 0, "0", 0 ); 
+}
+
+/**************************************************************
+An error checker for out of range errors
+***************************************************************/
+bool Assembler::error() {
+	if (!(rd >= 0 and rd <= 3)) {
+		cout << "Error destination register out of range!\n";
+		return true;
+	}
+	else if (!(rs >= 0 and rs <= 3)) {
+		cout << "Error source register out of range!\n";
+		return true;
+	}
+	else if (!(addr >= 0 and addr <= 256)) {
+		cout << "Error address out of range!\n";
+		return true;
+	}
+	else if (!(constant >= -128 and constant <= 128)) {
+		cout << "Error constant out of range!\n";
+		return true;
+	}
+	else {
+		return false;
+	}
 }
