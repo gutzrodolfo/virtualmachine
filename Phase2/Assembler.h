@@ -18,7 +18,7 @@ class Assembler {
  
  public:
     Assembler(string filename);
-	void parse();
+	bool parse();
 	void load();
 	void loadi();
 	void store();
@@ -53,6 +53,7 @@ class Assembler {
 	void write();
 	void halt(); 
 	void noop();
+	bool error();
 
 private:
 	typedef void (Assembler::*function)();

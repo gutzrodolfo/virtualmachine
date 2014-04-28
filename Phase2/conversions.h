@@ -10,6 +10,7 @@ Conversions.h
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 /*****************************************
@@ -127,7 +128,7 @@ inline int adder( int x, int y, char &i ) {
 	string a = dtb2(x, 16);
 	string b = dtb2(y, 16);
 	string out = "0000000000000000";
-	int carry = '0';
+	char carry = '0';
 	for (int i = 0; i < 16; i++) {
 		if(carry == '1' and a[15 - i] == '0' and b[15 - i] == '0') {
 			out[i] = '1'; 

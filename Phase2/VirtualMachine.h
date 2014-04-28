@@ -29,7 +29,7 @@ private:
 public:
   VirtualMachine(string filename);
   //These are all available operation by the VM
-  void parse(); 
+  bool parse(); 
   void load();
   void loadi();
   void store();
@@ -65,4 +65,5 @@ public:
   void halt(); 
   void noop();
   void overflow(int, int);
+  bool error();
 };
