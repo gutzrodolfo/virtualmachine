@@ -1,5 +1,5 @@
 /**********************************************
-Phase 1 Project
+Phase 2 Project
 Groupmates: Eli Gonzalez & Rodolfo Gutierrez
 Date:       04/21/2014
 Class:      CSE 460 
@@ -7,22 +7,30 @@ Class:      CSE 460
 os.cpp
 **********************************************/
 
-#include "Assembler.h"
-#include "VirtualMachine.h"
+#include "os.h"
+//#include "Assembler.h"
+//#include "VirtualMachine.h"
+//#include "PCB.h"
+#include <vector>
+#include <fstream>
 #include <string>
-#include <sstream>
 
-int main(int argc, char *argv[])
-{
-	//string name = argv[1];
-    Assembler as(argv[1]);
-    if (as.parse()) {
-    	return 0;
-    }
+using namespace std;
 
-    VirtualMachine vm(argv[1]);
-    if (vm.parse()) {
-    	return 0;
+os::os() {
+    system("ls *.s > progs");
+    ifstream as;
+    as.open("progs");
+    string name;
+    while (!as.eof()) {
+        getline(as, name);
+        assembled.push_back(new Assembler(name.substr(0, name.size() - 2)));
     }
-    return 0;
-} // main
+    as.close();
+}
+
+void os::assemble() {
+    for (int i = 0; i < assembled.size() - 1; i++) {
+        assembled[i]->parse();
+    }
+}

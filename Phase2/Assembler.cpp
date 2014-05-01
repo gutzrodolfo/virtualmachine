@@ -1,7 +1,7 @@
 /**********************************************
-Phase 1 Project
+Phase 2 Project
 Groupmates: Eli Gonzalez & Rodolfo Gutierrez
-Date: 	    04/21/2014
+Date: 	    04/30/2014
 Class:	    CSE 460 
 
 Assembler.cpp

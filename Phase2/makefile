@@ -1,5 +1,5 @@
-make: Assembler.o VirtualMachine.o os.cpp
-	g++ -o os VirtualMachine.o Assembler.o os.cpp
+make: Assembler.o VirtualMachine.o os.o
+	g++ -o os VirtualMachine.o Assembler.o os.o main.cpp
 
 Assembler.o: Assembler.cpp
 	g++ -c Assembler.cpp
@@ -7,9 +7,11 @@ Assembler.o: Assembler.cpp
 VirtualMachine.o: VirtualMachine.cpp
 	g++ -c VirtualMachine.cpp
 
+os.o: os.cpp
+	g++ -c os.cpp
+
 run: 
-	./os prog
+	./os
 
 clean:
-	rm Assembler.o
-	rm VirtualMachine.o
+	rm *.o
