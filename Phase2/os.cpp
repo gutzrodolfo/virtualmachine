@@ -8,9 +8,6 @@ os.cpp
 **********************************************/
 
 #include "os.h"
-//#include "Assembler.h"
-//#include "VirtualMachine.h"
-//#include "PCB.h"
 #include <vector>
 #include <fstream>
 #include <string>
@@ -23,8 +20,11 @@ os::os() {
     as.open("progs");
     string name;
     while (!as.eof()) {
+        ifstream in, s, st, o;
+        ofstream out;
         getline(as, name);
         assembled.push_back(new Assembler(name.substr(0, name.size() - 2)));
+        jobs.push_back(new PCB(name.substr(0, name.size() - 2)));
     }
     as.close();
 }
