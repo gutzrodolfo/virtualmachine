@@ -16,7 +16,7 @@ VirtualMachine.cpp
 
 using namespace std;
 
-VirtualMachine::VirtualMachine(string filename) {
+VirtualMachine::VirtualMachine() {
 /************************************************************
 The VM constructor needs to be initialized by startiing the
 clock, memory, and all the registers. Additionally, this needs
@@ -26,15 +26,6 @@ to have input and output. Finally, it needs some instructions.
 r = vector <int> (REG_FILE_SIZE);
 mem = vector <int> (MEM_SIZE);
 pc = 0;  base = 0; sr = 0; sp = 255; ir = 0;  clk = 0; limit = 0;
-
-string so = filename + ".o";
-string sin = filename + ".in";
-string sout = filename + ".out";
-
-o.open(so.c_str());
-in.open(sin.c_str());
-out.open(sout.c_str());
-
 
 /********************************************
 These are the functions that will called 
@@ -76,16 +67,6 @@ functions["11001"] = &VirtualMachine::noop;
 After the functions have been mapped and values initialized 
 the contructor loads all the machine instructions int memory.
 *************************************************************/
-int i = 0;        
-while (!o.eof()) {
-  int x;
-  o >> x;
-  o.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-  mem[i] = x;
-  limit++;
-  i++;
-}
-o.close();
 }
 
 /************************************************************
@@ -104,8 +85,8 @@ bool VirtualMachine::parse() {
       return true;
     }
   }
-  in.close();
-  out.close();
+  in -> close();
+  out -> close();
   return false; 
 }
 
@@ -375,16 +356,16 @@ void VirtualMachine::ret() {
  clk += 4;
 }
 void VirtualMachine::read() {
- in >> r[btd(irb.substr(5,2))];
+ *in >> r[btd(irb.substr(5,2))];
  clk += 28;
 }
 void VirtualMachine::write() {
- out << r[btd(irb.substr(5,2))]  << endl;
+ *out << r[btd(irb.substr(5,2))]  << endl;
  clk += 28;
 }
 void VirtualMachine::halt()  {
  pc = limit;
- out << "The clock count is: "  << clk << endl;
+ *out << "The clock count is: "  << clk << endl;
  clk += 1;
 } 
 void VirtualMachine::noop() {
@@ -423,3 +404,24 @@ bool VirtualMachine::error() {
   }
   return false;
 }
+
+//Function added to share between processes
+void VirtualMachine::mem_load (ifstream *loaded) {
+  o = loaded;
+  base = pc; 
+  limit = 0;      
+  while (!o -> eof()) {
+    int x;
+    *o >> x;
+    cout << x << endl;
+    o -> ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    mem[base] = x;
+    cout << mem[base] << endl;
+    cout << x << endl;
+    limit++;
+    base++;
+  }
+  base -= pc;
+  pc = base;
+}
+

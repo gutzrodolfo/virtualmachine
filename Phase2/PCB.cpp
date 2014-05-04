@@ -35,6 +35,7 @@ PCB::PCB(string filename) {
 	this -> o = &o;
 	this -> st = &st;
 	this -> out = &out;
+	//while (!(o -> ))
 }
 
 void PCB::modify(vector<int> registers, ifstream in, ifstream o, fstream st, ofstream out, int pc, int sr, int sp, int base,  int limit) {

@@ -24,10 +24,10 @@ private:
   string irb; //IR in binary form
   typedef void (VirtualMachine::*function)();
   map<string, function> functions;
-  ifstream o; ifstream in;
-  ofstream out;
+  ifstream *o, *in, *st;
+  ofstream *out;
 public:
-  VirtualMachine(string filename);
+  VirtualMachine();
   //These are all available operation by the VM
   bool parse(); 
   void load();
@@ -66,4 +66,5 @@ public:
   void noop();
   void overflow(int, int);
   bool error();
+  void mem_load(ifstream *);
 };

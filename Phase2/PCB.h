@@ -19,6 +19,7 @@ of each process. Rather than closing each file the will point to each file
 and the VM will change what files it points to. The in, st, o, out files will
 be opened by the PCB and closed at the end.
 *****************************************************************************/
+
 class PCB
 {
 private:

@@ -17,12 +17,13 @@ class os
 {
 private:
 	vector<Assembler*> assembled;
-	VirtualMachine machine();
+	VirtualMachine machine;
 	list <PCB *> jobs;
 	queue <PCB *> readyQ, waitQ;
 	PCB * running;
 public:
 	os(); //First make sure that wil the constructor it will assemble all the files
 	void assemble();
+	void load(); //Used to load the files into memory
 	void run();
 };
