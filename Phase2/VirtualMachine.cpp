@@ -415,11 +415,9 @@ void VirtualMachine::mem_load (fstream *loaded) {
   while (*o >> x) {
     o -> ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     mem[base] = x;
-    cout << mem[base] << endl;
     limit++;
     base++;
   }
-  o->close();
   pc = base + 1;
   base -= limit;
 }

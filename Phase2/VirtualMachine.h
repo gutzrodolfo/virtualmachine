@@ -26,6 +26,7 @@ private:
   map<string, function> functions;
   fstream *o, *in, *st;
   fstream *out;
+  friend class os;
 public:
   VirtualMachine();
   //These are all available operation by the VM

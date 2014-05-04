@@ -36,11 +36,13 @@ void os::assemble() {
 }
 
 void os::load() {
-    for (list<PCB *>::iterator it = jobs.begin(); it != jobs.end(); it++){
+    for (list<PCB *>::iterator it = jobs.begin(); it != jobs.end(); ++it) {
         //list<PCB *>::iterator it = jobs.begin();
         running = *it;
+        readyQ.push(*it);
         fstream * temp = &running -> o;
         machine.mem_load(temp);
+        running -> base = machine.base;
+        running -> limit = machine.limit;
     }
-    return;
 }
