@@ -1,5 +1,5 @@
 /**********************************************
-Phase 1 Project
+Phase 2 Project
 Groupmates: Eli Gonzalez & Rodolfo Gutierrez
 Date:       04/21/2014
 Class:      CSE 460 
@@ -406,22 +406,23 @@ bool VirtualMachine::error() {
 }
 
 //Function added to share between processes
-void VirtualMachine::mem_load (ifstream *loaded) {
+void VirtualMachine::mem_load (fstream *loaded) {
   o = loaded;
   base = pc; 
-  limit = 0;      
+  limit = 0;  
+  vector<int> temp;    
   while (!o -> eof()) {
     int x;
     *o >> x;
-    cout << x << endl;
     o -> ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     mem[base] = x;
     cout << mem[base] << endl;
-    cout << x << endl;
     limit++;
     base++;
   }
-  base -= pc;
+  o->close();
   pc = base;
+  base -= limit;
 }
+
 

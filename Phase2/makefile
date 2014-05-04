@@ -7,7 +7,7 @@ Assembler.o: Assembler.cpp
 VirtualMachine.o: VirtualMachine.cpp
 	g++ -c VirtualMachine.cpp
 
-PCB.o:
+PCB.o: PCB.cpp
 	g++ -c PCB.cpp
 
 os.o: os.cpp

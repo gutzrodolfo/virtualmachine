@@ -24,9 +24,8 @@ class PCB
 {
 private:
 	vector<int> registers;
-	ifstream *in, *o;
-	fstream  *st;
-	ofstream *out;
+	fstream in, o, st;
+	fstream out;
 	int pc, sr, sp, base, limit;
 	//Declaring the friend classes accounting info later
 	friend class VirtualMachine;

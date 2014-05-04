@@ -11,7 +11,6 @@ os.cpp
 #include <vector>
 #include <fstream>
 #include <string>
-#include <iostream>
 
 using namespace std;
 
@@ -21,8 +20,6 @@ os::os() {
     as.open("progs");
     string name;
     while (!as.eof()) {
-        ifstream in, s, st, o;
-        ofstream out;
         getline(as, name);
         assembled.push_back(new Assembler(name.substr(0, name.size() - 2)));
         jobs.push_back(new PCB(name.substr(0, name.size() - 2)));
@@ -42,6 +39,8 @@ void os::load() {
     for (list<PCB *>::iterator it = jobs.begin(); it != jobs.end(); it++){
         //list<PCB *>::iterator it = jobs.begin();
         running = *it;
-        machine.mem_load(running -> o);
+        fstream * temp = &running -> o;
+        machine.mem_load(temp);
     }
+    return;
 }

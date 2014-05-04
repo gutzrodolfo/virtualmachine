@@ -20,9 +20,6 @@ necessary.
 *****************************************************************************/
 
 PCB::PCB(string filename) {
-	ifstream in, o;
-	fstream st;
-	ofstream out;
 	string name = filename + ".in";
 	in.open(name.c_str());
 	name = filename + ".o";
@@ -31,19 +28,10 @@ PCB::PCB(string filename) {
 	st.open(name.c_str());
 	name = filename + ".out";
 	out.open(name.c_str());
-	this -> in = &in;
-	this -> o = &o;
-	this -> st = &st;
-	this -> out = &out;
-	//while (!(o -> ))
 }
 
 void PCB::modify(vector<int> registers, ifstream in, ifstream o, fstream st, ofstream out, int pc, int sr, int sp, int base,  int limit) {
 	this -> registers = registers;
-	this -> in = &in;
-	this -> o = &o;
-	this -> st = &st;
-	this -> out = &out;
 	this -> pc = pc;
 	this -> sr = sr;
 	this -> sp = sp;
