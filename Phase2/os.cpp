@@ -11,6 +11,7 @@ os.cpp
 #include <vector>
 #include <fstream>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -70,29 +71,23 @@ will handle any I/O process. The OS will only terminate once all the
 processes are finished.
 *************************************************************************/
 void os::run() {
-    while (stop >= 0) {
+    //for (int i = 0; i < 2; i++) {
         //Update the correct PCB
-        list<PCB *>::iterator it = jobs.begin();
-        while (it -> name != running -> name) {
-            it++;
-        }
-        it -> modify(add parameters here);
+        //list<PCB *>::iterator it = jobs.begin();
         //First change the running process in VM.
-        machine.change(running -> in, running -> o, running -> st, running -> out, running -> pc, running -> sr, running -> sp, running-> base, running -> limit, running -> registers);
+        cout << running-> pname << endl;
+        machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr, 
+            running -> sp, running-> base, running -> limit, running -> registers);
         machine.parse();
         readyQ.pop();
-        if (I/O condition) {
-            waitQ.push(running);
-        }
-        else {
-            readyQ.push(running);
-        }
+        running -> modify(machine.r, machine.pc, machine.sr, machine.sp, machine.base, machine.limit);
         running = readyQ.front();
-        if (!waitQ.empty()) {
-            //file I/O operations to PCB add them here
-            readyQ.push(waitQ.front());
-            waitQ.pop();
-        }
 
-    }
+
+        cout << running-> pname << endl;
+        machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr, 
+            running -> sp, running-> base, running -> limit, running -> registers);
+        machine.parse();        
+
+    //}
 }

@@ -6,4 +6,5 @@ int main() {
 	os myos;
 	myos.assemble();
 	myos.load();
+	myos.run(); 
 	}

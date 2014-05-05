@@ -27,10 +27,11 @@ private:
 	fstream in, o, st;
 	fstream out;
 	int pc, sr, sp, base, limit;
+	string pname;
 	//Declaring the friend classes accounting info later
 	friend class VirtualMachine;
 	friend class os;
 public:
 	PCB(string);
-	void modify(vector<int>, ifstream, ifstream, fstream, ofstream, int, int, int ,int, int);
+	void modify(vector<int>, int, int, int ,int, int);
 };
