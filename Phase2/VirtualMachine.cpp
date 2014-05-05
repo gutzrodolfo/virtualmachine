@@ -63,10 +63,6 @@ functions["10111"] = &VirtualMachine::write;
 functions["11000"] = &VirtualMachine::halt;
 functions["11001"] = &VirtualMachine::noop;
 
-/************************************************************
-After the functions have been mapped and values initialized 
-the contructor loads all the machine instructions int memory.
-*************************************************************/
 }
 
 /************************************************************

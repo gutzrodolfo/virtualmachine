@@ -63,7 +63,7 @@ public:
   void ret();
   void read();
   void write();
-  void halt(); 
+  bool halt(); 
   void noop();
   void overflow(int, int);
   bool error();

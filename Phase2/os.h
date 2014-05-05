@@ -16,11 +16,12 @@ run.
 class os
 {
 private:
-	vector<Assembler*> assembled;
+	vector<Assembler *> assembled;
 	VirtualMachine machine;
 	list <PCB *> jobs;
 	queue <PCB *> readyQ, waitQ;
 	PCB * running;
+	int stop;
 public:
 	os(); //First make sure that wil the constructor it will assemble all the files
 	void assemble();
