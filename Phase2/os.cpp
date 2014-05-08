@@ -12,6 +12,7 @@ os.cpp
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <cassert>
 
 using namespace std;
 
@@ -58,6 +59,7 @@ void os::load() {
         running -> base = machine.base;
         running -> limit = machine.limit;
         stop++;
+        //assert(running -> out.is_open());
     }
     machine.pc = 0;
     running = readyQ.front();
@@ -82,7 +84,6 @@ void os::run() {
         readyQ.pop();
         running -> modify(machine.r, machine.pc, machine.sr, machine.sp, machine.base, machine.limit);
         running = readyQ.front();
-
 
         cout << running-> pname << endl;
         machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr, 

@@ -10,6 +10,7 @@ PCB.cpp
 #include "PCB.h"
 #include <vector>
 #include <fstream>
+#include <cassert>
 
 using namespace std;
 
@@ -21,13 +22,14 @@ necessary.
 
 PCB::PCB(string filename) {
 	string name = filename + ".in";
-	in.open(name.c_str());
+	in.open(name.c_str(), fstream::in);
 	name = filename + ".o";
-	o.open(name.c_str());
+	o.open(name.c_str(), fstream::in);
 	name = filename + ".st";
-	st.open(name.c_str());
+	st.open(name.c_str(), fstream::in | fstream::out);
 	name = filename + ".out";
-	out.open(name.c_str());
+	out.open(name.c_str(), fstream::out);
+	assert(out.is_open());
 	pname = filename;
 }
 

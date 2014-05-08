@@ -72,12 +72,12 @@ to the VM. It handle the program counter and call the
 corresponding instruction.
 *************************************************************/
 void VirtualMachine::parse() {
-  for(; pc < base + limit -1; pc++) {
+  for(; pc <= base + limit - 1; pc++) {
     ir = mem[pc];
+    cout << pc << endl;
         //For testing purposes registers will be displayed all times
     irb = dtb(ir, 16);
     (*this.*functions[irb.substr(0,5)])();
-
     if (retn) {
       return; 
     }
@@ -319,27 +319,27 @@ void VirtualMachine::putstat() {
  clk += 1;
 }
 void VirtualMachine::jump() {
- pc = btd(irb.substr(8,8)) - 1;
+ pc = btd(irb.substr(8,8)) - 1 + base;
  clk += 1;
 }
 void VirtualMachine::jumpl() {
  string temp = dtb(sr, 16);
  if (temp[12] == '1') {
-  pc = btd(irb.substr(8,8)) - 1;
+  pc = btd(irb.substr(8,8)) - 1 + base;
 }
 clk += 1;
 }
 void VirtualMachine::jumpe() {
  string temp = dtb(sr, 16);
  if (temp[13] == '1') {
-  pc = btd(irb.substr(8,8)) - 1;
+  pc = btd(irb.substr(8,8)) - 1 + base;
 }
 clk += 1;
 }
 void VirtualMachine::jumpg() {
  string temp = dtb(sr, 16);
  if (temp[14] == '1') {
-  pc = btd(irb.substr(8,8)) - 1;
+  pc = btd(irb.substr(8,8)) - 1 + base;
 }  	
 clk += 1;
 }
@@ -374,7 +374,7 @@ void VirtualMachine::write() {
  //retn = true; 
 }
 void VirtualMachine::halt()  {
- pc = limit;
+ pc = base + limit;
  *out << "The clock count is: "  << clk << endl;
  clk += 1;
 } 
