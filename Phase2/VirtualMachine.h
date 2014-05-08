@@ -26,11 +26,13 @@ private:
   map<string, function> functions;
   fstream *o, *in, *st;
   fstream *out;
+  bool retn; 
   friend class os;
 public:
   VirtualMachine();
   //These are all available operation by the VM
-  bool parse(); 
+  void change( fstream *, fstream *, fstream *, fstream *, int, int, int, int, int, vector<int> ); 
+  void parse(); 
   void load();
   void loadi();
   void store();
@@ -63,10 +65,9 @@ public:
   void ret();
   void read();
   void write();
-  bool halt(); 
+  void halt(); 
   void noop();
   void overflow(int, int);
-  bool error();
+//  bool error();
   void mem_load(fstream *);
-  void print();
 };

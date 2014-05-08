@@ -28,9 +28,10 @@ PCB::PCB(string filename) {
 	st.open(name.c_str());
 	name = filename + ".out";
 	out.open(name.c_str());
+	pname = filename;
 }
 
-void PCB::modify(vector<int> registers, ifstream in, ifstream o, fstream st, ofstream out, int pc, int sr, int sp, int base,  int limit) {
+void PCB::modify(vector<int> registers, int pc, int sr, int sp, int base,  int limit) {
 	this -> registers = registers;
 	this -> pc = pc;
 	this -> sr = sr;

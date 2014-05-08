@@ -71,21 +71,33 @@ parses through the instructions after they have been loaded on
 to the VM. It handle the program counter and call the 
 corresponding instruction.
 *************************************************************/
-bool VirtualMachine::parse() {
-  for(pc = 0; pc < limit - 1; pc++) {
+void VirtualMachine::parse() {
+  for(; pc < base + limit -1; pc++) {
     ir = mem[pc];
-      //For testing purposes registers will be displayed all times
+        //For testing purposes registers will be displayed all times
     irb = dtb(ir, 16);
     (*this.*functions[irb.substr(0,5)])();
-    if (error()) {
-      return true;
-    }
-  }
-  in -> close();
-  out -> close();
-  return false; 
-}
 
+    if (retn) {
+      return; 
+    }
+    retn = false; 
+  }
+}
+void VirtualMachine::change(fstream * a, fstream * b, fstream * c, fstream * d, int t, int v, int w, int x, int y, vector<int> vec) {
+  this -> in = a; 
+  this -> o = b; 
+  this -> st = c; 
+  this -> out = d; 
+
+  this -> pc = t; 
+  this -> sr = v;  
+  this -> sp = w; 
+  this -> base = x;
+  this -> limit = y; 
+
+  this -> r = vec;
+}
 /************************************************************
 These are all the VM is able to do with this the VM will be
 able to execute. Through these the different operations are 
@@ -354,10 +366,12 @@ void VirtualMachine::ret() {
 void VirtualMachine::read() {
  *in >> r[btd(irb.substr(5,2))];
  clk += 28;
+ //retn = true; 
 }
 void VirtualMachine::write() {
  *out << r[btd(irb.substr(5,2))]  << endl;
  clk += 28;
+ //retn = true; 
 }
 void VirtualMachine::halt()  {
  pc = limit;
@@ -393,6 +407,7 @@ void VirtualMachine::overflow(int x, int y) {
     }
   }    
 } 
+/*
 bool VirtualMachine::error() {
   if (!(sp <= 256 or sp >= limit + 6)) {
     cout << "Warning the stack is overflowed! Not enough memory!\n";
@@ -400,6 +415,7 @@ bool VirtualMachine::error() {
   }
   return false;
 }
+*/ 
 
 //Function added to share between processes
 void VirtualMachine::mem_load (fstream *loaded) {
