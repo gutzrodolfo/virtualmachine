@@ -26,6 +26,7 @@ private:
 	queue <PCB *> readyQ, waitQ;
 	PCB * running;
 	int stop;
+	void erase();	
 public:
 	os(); //First make sure that wil the constructor it will assemble all the files
 	void assemble();

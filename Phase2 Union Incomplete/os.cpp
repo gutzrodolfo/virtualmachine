@@ -65,6 +65,18 @@ void os::load() {
 }
 
 
+void os::erase() {
+    PCB * temp;
+    for (list<PCB *>::iterator it = jobs.begin(); it != jobs.end(); ++it) {
+        temp = *it;
+        if(running ->pname == temp -> pname) {
+            jobs.erase(it);
+        }
+        it++;
+    }
+}
+
+
 /************************************************************************
 This is the heart of the os it will handle the running of all processes
 it will use the PCB, the VM, the readyQ, and the waitQ. Additionally, it 
@@ -72,23 +84,18 @@ will handle any I/O process. The OS will only terminate once all the
 processes are finished.
 *************************************************************************/
 void os::run() {
-    //for (int i = 0; i < 2; i++) {
-        //Update the correct PCB
-        //list<PCB *>::iterator it = jobs.begin();
-        //First change the running process in VM.
+    while (!jobs.empty()){
         cout << running-> pname << endl;
         machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr, 
-            running -> sp, running-> base, running -> limit, running -> registers);
+        running -> sp, running-> base, running -> limit, running -> registers);
         machine.parse();
         readyQ.pop();
+        erase();
         cout << machine.pc << endl; 
         running -> modify(machine.r, machine.pc, machine.sr.instr, machine.sp, machine.base, machine.limit);
-        running = readyQ.front();
-        running -> pc = machine.pc;
-        cout << running-> pc << " is the new PC" << endl;
-        machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr, 
-            running -> sp, running-> base, running -> limit, running -> registers);
-        machine.parse();        
-
-    //}
+        if (!readyQ.empty()) {
+            running = readyQ.front();
+        }
+        running -> pc = machine.pc;        
+    }
 }
