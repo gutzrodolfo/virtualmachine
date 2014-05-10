@@ -360,6 +360,7 @@ void VirtualMachine::write() {
 }
 void VirtualMachine::halt()  {
   pc = base + limit;
+  sr.status.r_status = 1;
   *out << "The clock count is: "  << clk << endl;
   clk += 1;
 } 

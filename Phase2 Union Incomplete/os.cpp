@@ -25,11 +25,10 @@ os::os() {
     ifstream as;
     as.open("progs");
     string name;
-    while (!as.eof()) {
-        getline(as, name);
+    while (as >> name) {
         assembled.push_back(new Assembler(name.substr(0, name.size() - 2)));
         jobs.push_back(new PCB(name.substr(0, name.size() - 2)));
-        //cout << name.substr(0, name.size() - 2) << endl;
+        cout << name.substr(0, name.size() - 2) << endl;
     }
     as.close();
     VirtualMachine machine;
@@ -40,7 +39,7 @@ The os will now assemble all of the instructions. These will be saved
 into the corresponding .o files. 
 **********************************************************************/
 void os::assemble() {
-    for (int i = 0; i < assembled.size() - 1; i++) {
+    for (int i = 0; i < assembled.size(); i++) {
         assembled[i]->parse();
     }
 }
@@ -90,7 +89,9 @@ void os::run() {
         running -> sp, running-> base, running -> limit, running -> registers);
         machine.parse();
         readyQ.pop();
-        erase();
+        if (machine.sr.status.r_status == 1) {
+            erase();
+        }
         cout << machine.pc << endl; 
         running -> modify(machine.r, machine.pc, machine.sr.instr, machine.sp, machine.base, machine.limit);
         if (!readyQ.empty()) {
