@@ -1,158 +1,44 @@
-/**********************************************
-Phase 1 Project
-Groupmates: Eli Gonzalez & Rodolfo Gutierrez
-Date: 	    04/21/2014
-Class:	    CSE 460 
+#ifndef UNION_H
+#define UNION_H
 
-Conversions.h
-**********************************************/
-#include <math.h>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <algorithm>
+struct r_type {
+  unsigned int unused : 6;
+  unsigned int rs : 2;
+  unsigned int imed : 1;
+  unsigned int rd : 2;
+  unsigned int opcode : 5;
+};
 
-using namespace std;
-/*****************************************
- Decimal to binary function for POSTIVE int values. 
- Return type is a string. 
-******************************************/ 
+struct a_type {
+  unsigned int addr : 8;
+  unsigned int imed : 1;
+  unsigned int rd : 2;
+  unsigned int opcode : 5;
+};
 
-inline string dtb(int x, int sz){
-	string s = "";
-	while(x > 0){
-		int bin = x % 2;
-		stringstream out;
-		out << bin;
-		s += out.str();
-		x = x/2;
-	}
-	reverse(s.begin(), s.end());
-	if(s.size() < sz) {
-		for(int i = 0; i <= s.size() - sz; i++) {
-			s.insert(0, "0");
-		}
-	}
-	return s;
-}
+struct i_type {
+  int constant : 8;
+  unsigned int imed : 1;
+  unsigned int rd : 2;
+  unsigned int opcode : 5;
+};
+struct s_type {
+  unsigned int unused : 6;
+  unsigned int io_reg : 2;
+  unsigned int r_status : 3;
+  unsigned int overflow : 1;
+  unsigned int less : 1;
+  unsigned int equal : 1;
+  unsigned int greater : 1;
+  unsigned int carry : 1;
+};
 
-/*****************************************
- Decimal to binary function for NEGATIVE int values. 
- Return type is a string. 
-******************************************/ 
+union codes {
+  int instr;
+  r_type reg;
+  a_type addr;
+  i_type imed;
+  s_type status;
+};
 
-inline string dtb2(int x, int sz){
-	if(x >= 0){
-		return dtb(x, sz);    // If positive, call decimal to binary. 
-	}
-	else {
-		string y;
-		x *= -1;              // Negate the number
-		y = dtb(x, sz);       // Take the number to get the binary form. 
-        					  
-    /*
-    Take the 2's complement; 
-    Negate the entire thing
-	*/
-		for (int i = 0; i < y.size(); i++) {
-			if(y[i] == '1') { 
-				y[i] = '0';
-			}
-			else {
-				y[i] = '1';
-			}
-		}
-	
-	// Add 1 to the code
-	
-		for(int i = y.size() - 1; i >= 0; i--) {
-			if(y[i] == '0') {
-				y[i] = '1';
-				break;
-			}
-			else {
-				y[i] = '0';
-			}
-		}
-		return y;
-	}
-}
-
-/*****************************************
- Binary to decimal function. Return type is 
- a an int. 
-******************************************/ 
-
- inline int btd(string code){
-	int decimal = 0;
-	for(int i = 0; i < code.size(); i++) {
-		if(code[i] == '1'){
-			decimal += pow(2, code.size() - i - 1);
-		}
-	}
-	return decimal;
-}
-
-inline int btd2(string code){
-	int decimal = 0;
-	if (code[0] == '0') {
-		return btd(code);
-	}
-	else {
-		for (int i = 0; i < code.size(); i++) {
-			if(code[i] == '1') { 
-				code[i] = '0';
-			}
-			else {
-				code[i] = '1';
-			}
-		}
-		
-		// Add 1 to the code
-		
-		for(int i = code.size() - 1; i >= 0; i--) {
-			if(code[i] == '0') {
-				code[i] = '1';
-				break;
-			}
-			else {
-				code[i] = '0';
-			}
-		}
-	}
-	decimal = -btd(code);
-	return decimal;
-}
-
-inline int adder( int x, int y, char &i ) {
-	string a = dtb2(x, 16);
-	string b = dtb2(y, 16);
-	string out = "0000000000000000";
-	char carry = '0';
-	for (int i = 0; i < 16; i++) {
-		if(carry == '1' and a[15 - i] == '0' and b[15 - i] == '0') {
-			out[i] = '1'; 
-			carry = '0';
-		}
-		else if(carry == '0' and a[15 - i] == '1' and b[15 - i] == '0') {
-			out[i] = '1'; 
-		}
-		else if(carry == '0' and a[15 - i] == '0' and b[15 - i] == '1') {
-			out[i] = '1'; 
-		}
-		else if(carry == '1' and a[15 - i] == '1' and b[15 - i] == '1') {
-			out[i] = '1';
-			carry = '1'; 
-		}
-		else if(carry == '0' and a[15 - i] == '1' and b[15 - i] == '1') {
-			out[i] = '0';
-			carry = '1';
-		}
-		else {
-			out[i] = '0';
-		}
-	}
-	i = carry;
-	reverse(out.begin(), out.end());
-	return btd2(out);
-}
+#endif

@@ -6,6 +6,8 @@ Class:      CSE 460
 
 PCB.h
 **********************************************/
+#ifndef PCB_H
+#define PCB_H
 
 #include <vector>
 #include <fstream>
@@ -35,3 +37,5 @@ public:
 	PCB(string);
 	void modify(vector<int>, int, int, int ,int, int);
 };
+
+#endif

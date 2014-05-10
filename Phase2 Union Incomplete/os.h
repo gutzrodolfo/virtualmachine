@@ -1,3 +1,7 @@
+
+#ifndef os_H
+#define os_H
+
 #include "Assembler.h"
 #include "VirtualMachine.h"
 #include "PCB.h"
@@ -28,3 +32,5 @@ public:
 	void load(); //Used to load the files into memory
 	void run();
 };
+
+#endif

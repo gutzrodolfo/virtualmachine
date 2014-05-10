@@ -130,6 +130,7 @@ void Assembler::add() {
 
 void Assembler::addi() {
 	code.imed.opcode = 2;
+	code.imed.imed = 1;
     in >> rd;
     code.imed.rd = rd;
     in >>  constant;

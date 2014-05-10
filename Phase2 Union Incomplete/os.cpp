@@ -82,7 +82,7 @@ void os::run() {
         machine.parse();
         readyQ.pop();
         cout << machine.pc << endl; 
-        running -> modify(machine.r, machine.pc, machine.sr, machine.sp, machine.base, machine.limit);
+        running -> modify(machine.r, machine.pc, machine.sr.instr, machine.sp, machine.base, machine.limit);
         running = readyQ.front();
         running -> pc = machine.pc;
         cout << running-> pc << " is the new PC" << endl;

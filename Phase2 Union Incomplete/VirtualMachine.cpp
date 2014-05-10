@@ -23,7 +23,7 @@ to have input and output. Finally, it needs some instructions.
 
 r = vector <int> (REG_FILE_SIZE);
 mem = vector <int> (MEM_SIZE);
-pc = 0;  base = 0; sr = 0; sp = 255; ir = 0;  clk = 0; limit = 0;
+pc = 0;  base = 0; sr.instr = 0; sp = 255; ir.instr = 0;  clk = 0; limit = 0;
 
 /********************************************
 These are the functions that will called 
@@ -71,14 +71,13 @@ corresponding instruction.
 *************************************************************/
 void VirtualMachine::parse() {
   for(; pc <= base + limit - 1; pc++) {
-    ir = mem[pc];
-    cout << pc << endl;
+    ir.instr = mem[pc];
       //For testing purposes registers will be displayed all times
+    cout << "The opcode is " << ir.reg.opcode << endl;
     (*this.*functions[ir.reg.opcode])();
     if (retn) {
       return; 
-    }
-    retn = false; 
+    } 
   }
 }
 void VirtualMachine::change(fstream * a, fstream * b, fstream * c, fstream * d, int t, int v, int w, int x, int y, vector<int> vec) {
@@ -88,7 +87,7 @@ void VirtualMachine::change(fstream * a, fstream * b, fstream * c, fstream * d, 
   this -> out = d; 
 
   this -> pc = t; 
-  this -> sr = v;  
+  this -> sr.instr = v;  
   this -> sp = w; 
   this -> base = x;
   this -> limit = y; 
@@ -107,7 +106,7 @@ void VirtualMachine::load() {
     loadi();
     return;
   }
-  r[ir.reg.rd] = mem[ir.reg.addr];
+  r[ir.reg.rd] = mem[ir.addr.addr];
   clk += 4;
 }
 void VirtualMachine::loadi() {
@@ -120,14 +119,25 @@ void VirtualMachine::store() {
 }
 void VirtualMachine::add() {
   if (ir.imed.imed == 1) {
+    cout << ir.imed.imed << endl;
     addi();
     return;
   }
-  r[ir.reg.rd] = r[ir.reg.rd] + r[ir.reg.rs];  
+  sr.status.carry = 0;
+  int test = r[ir.reg.rd] + r[ir.reg.rs];
+  if (test > 128 or test < -128) {
+    sr.status.carry = 1;
+  }
+  r[ir.reg.rd] = test;  
   clk += 1;
 }
 void VirtualMachine::addi() {
-  r[ir.reg.rd] = r[ir.reg.rd] + ir.imed.constant;
+  int test = r[ir.reg.rd] + ir.imed.constant;
+  if (test > 128 or test < -128) {
+    sr.status.carry = 1;
+  }
+  cout << test << endl;
+  r[ir.reg.rd] = test;
   clk += 1;
 }
 void VirtualMachine::addc() {
@@ -135,12 +145,25 @@ void VirtualMachine::addc() {
     addci();
     return;
   } 
-  r[ir.reg.rd] = r[ir.reg.rd] + r[ir.reg.rs] + carry;
+  int test = r[ir.reg.rd] + r[ir.reg.rs] + carry;
+  if (test > 128 or test < -128) {
+    sr.status.carry = 1;
+  }  
+  else {
+    sr.status.carry = 0;
+  } 
+  r[ir.reg.rd] = test;
   clk += 1;
 }
 void VirtualMachine::addci() {
-  r[ir.reg.rd] = r[ir.reg.rd] + ir.imed.constant + carry;
-
+  int test = r[ir.reg.rd] + ir.imed.constant + carry;
+  if (test > 128 or test < -128) {
+    sr.status.carry = 1;
+  }  
+  else {
+    sr.status.carry = 0;
+  } 
+  r[ir.reg.rd] = test;
   clk += 1;
 }
 void VirtualMachine::sub() {
@@ -148,11 +171,25 @@ void VirtualMachine::sub() {
     subi();
     return;
   }
-  r[ir.reg.rd] = r[ir.reg.rd] - r[ir.reg.rs];
+  int test = r[ir.reg.rd] - r[ir.reg.rs];
+  if (test > 128 or test < -128) {
+    sr.status.carry = 1;
+  }  
+  else {
+    sr.status.carry = 0;
+  } 
+  r[ir.reg.rd] = test;
   clk += 1;
 }
 void VirtualMachine::subi() {
-  r[ir.reg.rd] = r[ir.reg.rd] - ir.imed.constant;
+  int test = r[ir.reg.rd] - ir.imed.constant;
+  if (test > 128 or test < -128) {
+    sr.status.carry = 1;
+  }   
+  else {
+    sr.status.carry = 0;
+  }
+  r[ir.reg.rd] = test;
   clk += 1;
 }
 void VirtualMachine::subc() {
@@ -160,12 +197,25 @@ void VirtualMachine::subc() {
     subci();
     return;
   }
-  r[ir.reg.rd] = r[ir.reg.rd] - r[ir.reg.rs] + carry;
+  int test = r[ir.reg.rd] - r[ir.reg.rs] - carry;
+  if (test > 128 or test < -128) {
+    sr.status.carry = 1;
+  }  
+  else {
+    sr.status.carry = 0;
+  } 
+  r[ir.reg.rd] = test;
   clk += 1;
 }
 void VirtualMachine::subci() {
-  char carry = '0';
-  r[ir.reg.rd] = r[ir.reg.rd] - ir.imed.constant + carry;
+  int test = r[ir.reg.rd] - ir.imed.constant - carry;
+  if (test > 128 or test < -128) {
+    sr.status.carry = 1;
+  }  
+  else {
+    sr.status.carry = 0;
+  }  
+  r[ir.reg.rd] = test;
   clk += 1;
 }
 void VirtualMachine::ander() {
@@ -217,38 +267,43 @@ void VirtualMachine::compr() {
     compri();
     return;
   }
+  sr.status.equal = 0;
+  sr.status.less = 0;
+  sr.status.greater = 0;
   if (r[ir.reg.rd] == r[ir.reg.rs]) {
-    sr = btd(temp.substr(0,12) + "010" + temp.substr(15,1));
+    sr.status.equal = 1;
   }
   if (r[ir.reg.rd] < r[ir.reg.rs]) {
-    sr = btd(temp.substr(0,12) + "100" + temp.substr(15,1));
+    sr.status.less = 1;
   }
   if (r[ir.reg.rd] > r[ir.reg.rs]) {
-    sr = btd(temp.substr(0,12) + "001" + temp.substr(15,1));
+    sr.status.greater = 1;
   } 
   clk += 1; 	  	
 }
 void VirtualMachine::compri() {
-  string temp = dtb(sr, 16);
   cout << "The register is " <<ir.reg.rd <<  " " << r[ir.reg.rd] << endl;
   cout << "The memory is " << ir.imed.constant << endl;
-  if (r[ir.reg.rd] == ir.imed.constant {
-    sr = btd(temp.substr(0,12) + "010" + temp.substr(15,1));
+  sr.status.equal = 0;
+  sr.status.less = 0;
+  sr.status.greater = 0;
+  if (r[ir.reg.rd] == ir.imed.constant) {
+    sr.status.equal = 1;
   }
-  if (r[ir.reg.rd] < ir.imed.constant {
-    sr = btd(temp.substr(0,12) + "100" + temp.substr(15,1));
+  if (r[ir.reg.rd] < ir.imed.constant) {
+    sr.status.less = 1;
   }
-  if (r[ir.reg.rd] > ir.imed.constant {
-    sr = btd(temp.substr(0,12) + "001" + temp.substr(15,1));
+  if (r[ir.reg.rd] > ir.imed.constant) {
+    sr.status.greater = 1;
   }  
   clk += 1;	  	
 }
 void VirtualMachine::getstat() {
-  r[ir.reg.rd] = sr;
+  r[ir.reg.rd] = sr.instr;
   clk += 1;
 }
 void VirtualMachine::putstat() {
-  sr = r[ir.reg.rd];
+  sr.instr = r[ir.reg.rd];
   clk += 1;
 }
 void VirtualMachine::jump() {
@@ -256,22 +311,19 @@ void VirtualMachine::jump() {
   clk += 1;
 }
 void VirtualMachine::jumpl() {
-  string temp = dtb(sr, 16);
-  if (temp[12] == '1') {
+  if (sr.status.less == 1) {
     pc = ir.addr.addr - 1 + base;
   }
   clk += 1;
 }
 void VirtualMachine::jumpe() {
-  string temp = dtb(sr, 16);
-  if (temp[13] == '1') {
+  if (sr.status.equal == 1) {
     pc = ir.addr.addr - 1 + base;
   }
   clk += 1;
 }
 void VirtualMachine::jumpg() {
-  string temp = dtb(sr, 16);
-  if (temp[14] == '1') {
+  if (sr.status.greater == 1) {
     pc = ir.addr.addr - 1 + base;
   }  	
   clk += 1;
@@ -282,13 +334,13 @@ void VirtualMachine::call() {
   mem[--sp] = r[1];
   mem[--sp] = r[2];
   mem[--sp] = r[3];
-  mem[--sp] = sr;
+  mem[--sp] = sr.instr;
   sp--;
   pc = ir.addr.addr - 1;
   clk += 4;
 }
 void VirtualMachine::ret() {
-  sr = mem[++sp]; 
+  sr.instr = mem[++sp]; 
   r[3] = mem[++sp];
   r[2] = mem[++sp];
   r[1] = mem[++sp];
@@ -322,15 +374,13 @@ void VirtualMachine::mem_load (fstream *loaded) {
   base = pc; 
   limit = 0;  
   vector<int> temp;   
-  int x; 
-  while (*o >> x) {
+  int to_load; 
+  while (*o >> to_load) {
     o -> ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    mem[base] = x;
+    mem[base] = to_load;
     limit++;
     base++;
   }
   pc = base + 1;
   base -= limit;
 }
-
-
