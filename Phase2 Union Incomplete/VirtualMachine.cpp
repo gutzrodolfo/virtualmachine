@@ -128,12 +128,12 @@ void VirtualMachine::add() {
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
   }
-  r[ir.reg.rd] = test;  
+  r[ir.reg.rd] = test;
+  cout << "Added = " << r[ir.reg.rd] << endl;
   clk += 1;
 }
 void VirtualMachine::addi() {
   int test = r[ir.reg.rd] + ir.imed.constant;
-  cout << r[ir.reg.rd] << endl;
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
   }
@@ -270,7 +270,6 @@ void VirtualMachine::compr() {
   sr.status.equal = 0;
   sr.status.less = 0;
   sr.status.greater = 0;
-  cout << r[ir.reg.rd] << " and " <<  r[ir.reg.rs] << endl;
   if (r[ir.reg.rd] == r[ir.reg.rs]) {
     sr.status.equal = 1;
   }
@@ -349,24 +348,26 @@ void VirtualMachine::ret() {
 }
 void VirtualMachine::read() {
   sr.status.r_status = 6;
+  sr.status.io_reg = ir.reg.rd;
   clk += 28;
   retn = true; 
 }
 
 void VirtualMachine::read_helper(int read) {
   cout << "Read " << read << endl;
-  r[ir.reg.rd] = read;
-  cout << "reg " << r[ir.reg.rd] << endl;
+  r[sr.status.io_reg] = read;
+  cout << "reg " << r[sr.status.io_reg] << endl;
 }
 
 void VirtualMachine::write() {
   sr.status.r_status = 7;
+  sr.status.io_reg = ir.reg.rd;
   clk += 28;
   retn = true; 
 }
 
 void VirtualMachine::write_helper(int write) {
-  cout << write << "is writing" << endl;
+  cout << write << "is writing " << endl;
   *out << write << endl;
 }
 

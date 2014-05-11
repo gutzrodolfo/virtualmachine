@@ -28,27 +28,26 @@ os::os() {
     while (as >> name) {
         assembled.push_back(new Assembler(name.substr(0, name.size() - 2)));
         jobs.push_back(new PCB(name.substr(0, name.size() - 2)));
-        cout << name.substr(0, name.size() - 2) << endl;
     }
     as.close();
     VirtualMachine machine;
 }
 
 void os::decide() {
-    decide_wq();
-    cout << "Got past running wq" << endl;        
-    decide_run();
-    cout << "Got past running run" << endl;        
-    decide_rq();
-    cout << "Got past running rq" << endl;        
+    decide_wq();       
+    decide_run();        
+    decide_rq();        
 }
 
 void os::decide_run() {
     if (machine.sr.status.r_status == 1) {
+        if (jobs.size() == 1) {
+            decide_wq();
+        }
         erase();
     }
     else if (machine.sr.status.r_status == 6 or machine.sr.status.r_status == 7) {
-        waitQ.push(running);
+        waitQ.push(running); 
     }
     else {
         readyQ.push(running);
@@ -61,23 +60,21 @@ void os::decide_wq() {
     }
     else {
         io();
-        cout << "Got past running io" << endl; 
     }
 }
 
 void os::io() {
     PCB * temp = waitQ.front();
     waitQ.pop();
-    cout << "Got past running waitqPOP" << endl;
     if (machine.sr.status.r_status == 6) {
-        temp -> reader(); 
+        temp -> in >> temp -> read;
+        cout << "Reading from process" << temp -> pname << endl;
         cout << "ReadFirst " << temp -> read << endl;
     }
     else if (machine.sr.status.r_status == 7) {
-        cout << "Got past running waitqPOP2" << endl;
-        cout << temp -> registers[0] << endl;
+        cout << "Write to process" << temp -> pname << endl;
+        cout << "to write" <<temp -> registers[temp -> sr.status.io_reg] << endl;
         temp -> write = temp -> registers[temp -> sr.status.io_reg];
-        cout << "wrinting" << endl;
     }
     readyQ.push(temp);
 }
@@ -130,12 +127,11 @@ void os::load() {
 
 void os::erase() {
     PCB * temp;
-    for (list<PCB *>::iterator it = jobs.begin(); it != jobs.end(); ++it) {
+    for (list<PCB *>::iterator it = jobs.begin(); it != jobs.end(); it++) {
         temp = *it;
         if(running ->pname == temp -> pname) {
             jobs.erase(it);
         }
-        it++;
     }
 }
 
@@ -148,10 +144,6 @@ processes are finished.
 *************************************************************************/
 void os::run() {
     while (!jobs.empty()){
-        cout << running-> pname << endl;     
-        cout << "the  pc is " << running -> pc << endl;
-        cout << "the base is " << running -> base << endl;
-        cout << "the limit is " << running -> limit << endl;
         if (machine.sr.status.r_status == 6) {
             machine.read_helper(running -> read);
             machine.sr.status.r_status = 0;
@@ -161,9 +153,7 @@ void os::run() {
             machine.sr.status.r_status = 0;
         }
         machine.parse();
-        cout << "the  pc after parse is " << running -> pc << endl;
-        cout << "the base after parse is " << running -> base << endl;
-        cout << "the limit after parse is " << running -> limit << endl;
+        machine.base = running -> base;
         running -> modify(machine.r, machine.sr, machine.pc + 1, machine.sp, machine.base,  machine.limit);
         decide();
         machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr.instr, 

@@ -42,7 +42,3 @@ void PCB::modify(vector<int> registers, codes sr, int pc, int sp, int base,  int
 	this -> base = base;
 	this -> limit = limit;
 }
-
-void PCB::reader() {
-	in >> read;
-}

@@ -38,7 +38,6 @@ private:
 public:
 	PCB(string);
 	void modify(vector<int>, codes, int, int ,int, int);
-	void reader();
 };
 
 #endif
