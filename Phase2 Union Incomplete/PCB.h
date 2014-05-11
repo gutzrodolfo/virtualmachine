@@ -12,6 +12,7 @@ PCB.h
 #include <vector>
 #include <fstream>
 #include <string>
+#include "conversions.h"
 
 using namespace std;
 
@@ -28,14 +29,16 @@ private:
 	vector<int> registers;
 	fstream in, o, st;
 	fstream out;
-	int pc, sr, sp, base, limit;
+	int pc, sp, base, limit, read, write;
+	codes sr;
 	string pname;
 	//Declaring the friend classes accounting info later
 	friend class VirtualMachine;
 	friend class os;
 public:
 	PCB(string);
-	void modify(vector<int>, int, int, int ,int, int);
+	void modify(vector<int>, codes, int, int ,int, int);
+	void reader();
 };
 
 #endif

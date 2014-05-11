@@ -31,13 +31,18 @@ PCB::PCB(string filename) {
 	out.open(name.c_str(), fstream::out);
 	assert(out.is_open());
 	pname = filename;
+	registers = vector <int> (4);
 }
 
-void PCB::modify(vector<int> registers, int pc, int sr, int sp, int base,  int limit) {
+void PCB::modify(vector<int> registers, codes sr, int pc, int sp, int base,  int limit) {
 	this -> registers = registers;
 	this -> pc = pc;
 	this -> sr = sr;
 	this -> sp = sp;
 	this -> base = base;
 	this -> limit = limit;
+}
+
+void PCB::reader() {
+	in >> read;
 }

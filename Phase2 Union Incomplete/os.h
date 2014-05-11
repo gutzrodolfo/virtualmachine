@@ -25,8 +25,12 @@ private:
 	list <PCB *> jobs;
 	queue <PCB *> readyQ, waitQ;
 	PCB * running;
-	int stop;
-	void erase();	
+	void erase();
+	void decide();
+	void decide_run();	
+	void decide_rq();
+	void decide_wq();
+	void io();
 public:
 	os(); //First make sure that wil the constructor it will assemble all the files
 	void assemble();

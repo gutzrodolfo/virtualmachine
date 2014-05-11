@@ -1,4 +1,4 @@
-/**********************************************
+ /**********************************************
 Phase 2 Project
 Groupmates: Eli Gonzalez & Rodolfo Gutierrez
 Date:       04/21/2014
@@ -24,6 +24,7 @@ to have input and output. Finally, it needs some instructions.
 r = vector <int> (REG_FILE_SIZE);
 mem = vector <int> (MEM_SIZE);
 pc = 0;  base = 0; sr.instr = 0; sp = 255; ir.instr = 0;  clk = 0; limit = 0;
+retn = false;
 
 /********************************************
 These are the functions that will called 
@@ -70,12 +71,12 @@ to the VM. It handle the program counter and call the
 corresponding instruction.
 *************************************************************/
 void VirtualMachine::parse() {
-  for(; pc <= base + limit - 1; pc++) {
+  for(; pc < base + limit; pc++) {
     ir.instr = mem[pc];
-      //For testing purposes registers will be displayed all times
-    cout << "The opcode is " << ir.reg.opcode << endl;
+    cout << "The PC is " << pc << endl;
     (*this.*functions[ir.reg.opcode])();
     if (retn) {
+      retn = false;
       return; 
     } 
   }
@@ -119,7 +120,6 @@ void VirtualMachine::store() {
 }
 void VirtualMachine::add() {
   if (ir.imed.imed == 1) {
-    cout << ir.imed.imed << endl;
     addi();
     return;
   }
@@ -133,10 +133,10 @@ void VirtualMachine::add() {
 }
 void VirtualMachine::addi() {
   int test = r[ir.reg.rd] + ir.imed.constant;
+  cout << r[ir.reg.rd] << endl;
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
   }
-  cout << test << endl;
   r[ir.reg.rd] = test;
   clk += 1;
 }
@@ -270,6 +270,7 @@ void VirtualMachine::compr() {
   sr.status.equal = 0;
   sr.status.less = 0;
   sr.status.greater = 0;
+  cout << r[ir.reg.rd] << " and " <<  r[ir.reg.rs] << endl;
   if (r[ir.reg.rd] == r[ir.reg.rs]) {
     sr.status.equal = 1;
   }
@@ -282,8 +283,6 @@ void VirtualMachine::compr() {
   clk += 1; 	  	
 }
 void VirtualMachine::compri() {
-  cout << "The register is " <<ir.reg.rd <<  " " << r[ir.reg.rd] << endl;
-  cout << "The memory is " << ir.imed.constant << endl;
   sr.status.equal = 0;
   sr.status.less = 0;
   sr.status.greater = 0;
@@ -349,15 +348,28 @@ void VirtualMachine::ret() {
   clk += 4;
 }
 void VirtualMachine::read() {
-  *in >> r[ir.reg.rd];
+  sr.status.r_status = 6;
   clk += 28;
-//retn = true; 
+  retn = true; 
 }
+
+void VirtualMachine::read_helper(int read) {
+  cout << "Read " << read << endl;
+  r[ir.reg.rd] = read;
+  cout << "reg " << r[ir.reg.rd] << endl;
+}
+
 void VirtualMachine::write() {
-  *out << r[ir.reg.rd]  << endl;
+  sr.status.r_status = 7;
   clk += 28;
-//retn = true; 
+  retn = true; 
 }
+
+void VirtualMachine::write_helper(int write) {
+  cout << write << "is writing" << endl;
+  *out << write << endl;
+}
+
 void VirtualMachine::halt()  {
   pc = base + limit;
   sr.status.r_status = 1;
@@ -382,6 +394,6 @@ void VirtualMachine::mem_load (fstream *loaded) {
     limit++;
     base++;
   }
-  pc = base + 1;
+  pc = base;
   base -= limit;
 }

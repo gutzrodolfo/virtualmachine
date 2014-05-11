@@ -34,6 +34,70 @@ os::os() {
     VirtualMachine machine;
 }
 
+void os::decide() {
+    decide_wq();
+    cout << "Got past running wq" << endl;        
+    decide_run();
+    cout << "Got past running run" << endl;        
+    decide_rq();
+    cout << "Got past running rq" << endl;        
+}
+
+void os::decide_run() {
+    if (machine.sr.status.r_status == 1) {
+        erase();
+    }
+    else if (machine.sr.status.r_status == 6 or machine.sr.status.r_status == 7) {
+        waitQ.push(running);
+    }
+    else {
+        readyQ.push(running);
+    }
+}
+
+void os::decide_wq() {
+    if (waitQ.empty()) {
+        return;
+    }
+    else {
+        io();
+        cout << "Got past running io" << endl; 
+    }
+}
+
+void os::io() {
+    PCB * temp = waitQ.front();
+    waitQ.pop();
+    cout << "Got past running waitqPOP" << endl;
+    if (machine.sr.status.r_status == 6) {
+        temp -> reader(); 
+        cout << "ReadFirst " << temp -> read << endl;
+    }
+    else if (machine.sr.status.r_status == 7) {
+        cout << "Got past running waitqPOP2" << endl;
+        cout << temp -> registers[0] << endl;
+        temp -> write = temp -> registers[temp -> sr.status.io_reg];
+        cout << "wrinting" << endl;
+    }
+    readyQ.push(temp);
+}
+
+void os::decide_rq() {
+    if (readyQ.empty()) {
+        return;
+    }
+    else {
+        readyQ.pop();
+        if (readyQ.empty()) {
+            return;
+        }
+        else {
+            running = readyQ.front();
+        }
+    }
+}
+
+
 /*********************************************************************
 The os will now assemble all of the instructions. These will be saved 
 into the corresponding .o files. 
@@ -57,7 +121,7 @@ void os::load() {
         machine.mem_load(temp);
         running -> base = machine.base;
         running -> limit = machine.limit;
-        stop++;
+        running -> pc = running -> base;
     }
     machine.pc = 0;
     running = readyQ.front();
@@ -84,19 +148,25 @@ processes are finished.
 *************************************************************************/
 void os::run() {
     while (!jobs.empty()){
-        cout << running-> pname << endl;
-        machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr, 
-        running -> sp, running-> base, running -> limit, running -> registers);
+        cout << running-> pname << endl;     
+        cout << "the  pc is " << running -> pc << endl;
+        cout << "the base is " << running -> base << endl;
+        cout << "the limit is " << running -> limit << endl;
+        if (machine.sr.status.r_status == 6) {
+            machine.read_helper(running -> read);
+            machine.sr.status.r_status = 0;
+        }
+        else if (machine.sr.status.r_status == 7) {
+            machine.write_helper(running -> write);
+            machine.sr.status.r_status = 0;
+        }
         machine.parse();
-        readyQ.pop();
-        if (machine.sr.status.r_status == 1) {
-            erase();
-        }
-        cout << machine.pc << endl; 
-        running -> modify(machine.r, machine.pc, machine.sr.instr, machine.sp, machine.base, machine.limit);
-        if (!readyQ.empty()) {
-            running = readyQ.front();
-        }
-        running -> pc = machine.pc;        
+        cout << "the  pc after parse is " << running -> pc << endl;
+        cout << "the base after parse is " << running -> base << endl;
+        cout << "the limit after parse is " << running -> limit << endl;
+        running -> modify(machine.r, machine.sr, machine.pc + 1, machine.sp, machine.base,  machine.limit);
+        decide();
+        machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr.instr, 
+        running -> sp, running-> base, running -> limit, running -> registers);        
     }
 }

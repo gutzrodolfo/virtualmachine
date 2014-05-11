@@ -70,6 +70,8 @@ public:
   void call();
   void ret();
   void read();
+  void read_helper(int);
+  void write_helper(int);
   void write();
   void halt(); 
   void noop();
