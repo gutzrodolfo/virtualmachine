@@ -139,6 +139,7 @@ void os::erase() {
     for (list<PCB *>::iterator it = jobs.begin(); it != jobs.end(); it++) {
         temp = *it;
         if(running ->pname == temp -> pname) {
+            cout << "Erasing... " << temp -> pname << endl;
             jobs.erase(it);
 	    return;
         }
@@ -182,10 +183,13 @@ void os::run() {
             running -> waitclk += 27;
             machine.sr.status.r_status = 0;
         }
+        cout << running -> pname << " is the process\n" << "The PC is " << machine.pc << endl;
+        cout << "The base is: " << machine.base << " and the limit is: " << machine.limit << endl;
         long double startp = static_cast<long double> ( time(NULL) ); 
         machine.parse();
         nonidle += (static_cast<long double> ( time(NULL) ) - startp);
         machine.base = running -> base;
+        machine.limit = running -> limit;
         cout << machine.sp << endl;
         running -> modify(machine.r, machine.sr, machine.pc, machine.sp, machine.base,  machine.limit, machine.clk, machine.max_sp);
         decide();

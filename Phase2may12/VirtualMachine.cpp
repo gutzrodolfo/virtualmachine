@@ -75,17 +75,19 @@ corresponding instruction.
 void VirtualMachine::parse() {
   for(; pc < base + limit; ) {
     ir.instr = mem[pc];
-    pc++;
     cout << "The instruction is" << ir.reg.opcode << endl;
+    assert(sr.status.r_status != 6 and sr.status.r_status != 7);
     if (sr.status.r_status == 6 or sr.status.r_status == 7) {
-      pc--;
       cout << "Currently reading or writing\n";
+      retn = true;
     }
     else {
       cout << "Currently executing" << endl;
       (*this.*functions[ir.reg.opcode])();
+      pc++;
     }
     if (retn) {
+      cout << "Returning" << endl;
       stack_save();
       retn = false;
       return;
@@ -431,6 +433,7 @@ void VirtualMachine::halt()  {
   pc = base + limit;
   sr.status.r_status = 1;
   endtimestamp = static_cast<long double> ( time(NULL) );
+  cout << "Halting\n";
   *out << "The clock count is: "  << clk << endl;
   clk += 1;
   print();
@@ -457,7 +460,6 @@ void VirtualMachine::mem_load (fstream *loaded) {
   }
   pc = base;
   base -= limit;
-  print();
 }
  
 void VirtualMachine::stack_save() {
@@ -468,13 +470,11 @@ void VirtualMachine::stack_save() {
   for(int i = this -> sp; i < 256; i++) {
     *st << mem[i];
   }
-  print();
 }
  
 void VirtualMachine::stack_load() {
   for (int stack = 255; stack >= sp; stack--) {
     *st >> mem[stack];
   }
-  print();
 }
 
