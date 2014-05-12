@@ -14,7 +14,7 @@ VirtualMachine.h
 #include <map>
 #include <fstream>
 #include <limits>
-#include "conversions.h"
+#include "unions.h"
 
 using namespace std;
 
@@ -77,8 +77,6 @@ public:
   void halt(); 
   void noop();
   void overflow(int, int);
-  void print();
-//  bool error();
   void mem_load(fstream *);
   void stack_save();
   void stack_load();

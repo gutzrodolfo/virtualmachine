@@ -8,9 +8,6 @@ PCB.cpp
 **********************************************/
 
 #include "PCB.h"
-#include <vector>
-#include <fstream>
-#include <cassert>
 
 using namespace std;
 
@@ -39,13 +36,11 @@ PCB::PCB(string filename) {
 	processclk = 0; waitclk = 0; readyclk = 0; stack = 0; turntime = 0;
 }
 
-void PCB::modify(vector<int> registers, codes sr, int pc, int sp, int base, int limit, long double clk, int stack) {
+void PCB::modify(vector<int> registers, codes sr, int pc, int sp, long double clk, int stack) {
 	this -> registers = registers;
 	this -> pc = pc;
 	this -> sr = sr;
 	this -> sp = sp;
-	this -> base = base;
-	this -> limit = limit;
 	this -> processclk = clk;
 	this -> stack = stack; 
 }

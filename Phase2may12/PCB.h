@@ -12,7 +12,8 @@ PCB.h
 #include <vector>
 #include <fstream>
 #include <string>
-#include "conversions.h"
+#include <cassert>
+#include "unions.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ private:
 	friend class os;
 public:
 	PCB(string);
-	void modify(vector<int>, codes, int, int ,int, int, long double, int);
+	void modify(vector<int>, codes, int, int, long double, int);
 	void print();
 };
 

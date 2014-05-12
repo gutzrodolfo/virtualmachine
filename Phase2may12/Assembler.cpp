@@ -6,15 +6,8 @@ Class:	    CSE 460
 
 Assembler.cpp
 **********************************************/
-#include <vector>
-#include <iostream>
-#include <map>
-#include <string>
-#include <fstream>
 #include "Assembler.h"
 #include <algorithm>
-#include <cassert>
-#include <limits>
 
 using namespace std;
 

@@ -1,8 +1,13 @@
-8
-The clock count is: 4
+1
+5
+9
+13
+17
+21
+The clock count is: 51
 *** Process Specific Info ***
-The CPU time is 5 number of clock ticks
+The CPU time is 52 number of clock ticks
 The Waiting time is 0 number of clock ticks
 The Turnaround time is 0 number of seconds
-The I/O time is 54 number of clock ticks
+The I/O time is 486 number of clock ticks
 The largest stack size is 0

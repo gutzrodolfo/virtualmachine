@@ -7,12 +7,7 @@ Class:      CSE 460
 VirtualMachine.cpp
 **********************************************/
 #include "VirtualMachine.h"
-#include <map>
-#include <fstream>
-#include <string>
-#include <iostream>
-#include <cassert>
- 
+
 using namespace std;
  
 VirtualMachine::VirtualMachine() {
@@ -75,19 +70,9 @@ corresponding instruction.
 void VirtualMachine::parse() {
   for(; pc < base + limit; ) {
     ir.instr = mem[pc];
-    cout << "The instruction is" << ir.reg.opcode << endl;
-    assert(sr.status.r_status != 6 and sr.status.r_status != 7);
-    if (sr.status.r_status == 6 or sr.status.r_status == 7) {
-      cout << "Currently reading or writing\n";
-      retn = true;
-    }
-    else {
-      cout << "Currently executing" << endl;
-      (*this.*functions[ir.reg.opcode])();
-      pc++;
-    }
+    (*this.*functions[ir.reg.opcode])();
+    pc++;
     if (retn) {
-      cout << "Returning" << endl;
       stack_save();
       retn = false;
       return;
@@ -111,13 +96,6 @@ void VirtualMachine::change(fstream * a, fstream * b, fstream * c, fstream * d, 
   this -> r = vec;
 }
 
-void VirtualMachine::print() {
-  cout << "The PC is " << pc << endl << "the opcode is: " << ir.reg.opcode << endl;
-  cout << "The stack pointer is " << sp << endl;  
-  cout << "R[0] = " << r[0] << " R[1] = " << r[1] << " R[2] = " << r[2] << " R[3] = " << r[3] << endl;
-  cout << "If mem is needed here it is " << mem[ir.addr.addr] << endl;
-
-}
 /************************************************************
 These are all the VM is able to do with this the VM will be
 able to execute. Through these the different operations are
@@ -132,17 +110,17 @@ void VirtualMachine::load() {
   }
   r[ir.addr.rd] = mem[ir.addr.addr];
   clk += 4;
-  print();
+  
 }
 void VirtualMachine::loadi() {
   r[ir.imed.rd] = ir.imed.constant;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::store() {
   mem[ir.addr.addr] = r[ir.addr.rd];
   clk += 4;
-  print();
+  
 }
 void VirtualMachine::add() {
   if (ir.imed.imed == 1) {
@@ -156,7 +134,7 @@ void VirtualMachine::add() {
   }
   r[ir.reg.rd] = r[ir.reg.rd] + r[ir.reg.rs];
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::addi() {
   sr.status.carry = 0;
@@ -166,7 +144,7 @@ void VirtualMachine::addi() {
   }
   r[ir.reg.rd] = r[ir.imed.rd] + ir.imed.constant;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::addc() {
   if (ir.imed.imed == 1) {
@@ -180,7 +158,7 @@ void VirtualMachine::addc() {
   }
   r[ir.reg.rd] = r[ir.reg.rd] + r[ir.reg.rs] + carry;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::addci() {
   sr.status.carry = 0;
@@ -190,7 +168,7 @@ void VirtualMachine::addci() {
   }
   r[ir.reg.rd] = r[ir.imed.rd] + ir.imed.constant + carry;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::sub() {
   if (ir.imed.imed == 1) {
@@ -204,7 +182,7 @@ void VirtualMachine::sub() {
   }
   r[ir.reg.rd] = r[ir.reg.rd] - r[ir.reg.rs];
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::subi() {
   sr.status.carry = 0;
@@ -214,7 +192,7 @@ void VirtualMachine::subi() {
   }
   r[ir.reg.rd] = r[ir.imed.rd] - ir.imed.constant;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::subc() {
   if (ir.imed.imed == 1) {
@@ -228,7 +206,7 @@ void VirtualMachine::subc() {
   }
   r[ir.reg.rd] = r[ir.reg.rd] - r[ir.reg.rs] - carry;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::subci() {
   sr.status.carry = 0;
@@ -238,7 +216,7 @@ void VirtualMachine::subci() {
   } 
   r[ir.reg.rd] = r[ir.imed.rd] - ir.imed.constant - carry;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::ander() {
   if (ir.imed.imed == 1) {
@@ -247,12 +225,12 @@ void VirtualMachine::ander() {
   }
   r[ir.reg.rd] = r[ir.reg.rd] & r[ir.reg.rs];
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::andi() {
   r[ir.reg.rd] = r[ir.reg.rd] & ir.imed.constant;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::xorer() {
   if (ir.imed.imed == 1) {
@@ -261,17 +239,17 @@ void VirtualMachine::xorer() {
   }
   r[ir.reg.rd] = r[ir.reg.rd] ^ r[ir.reg.rs];
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::xori() {
   r[ir.reg.rd] = r[ir.imed.rd] ^ ir.imed.constant;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::negate() {
   r[ir.reg.rd] = ~r[ir.reg.rd];
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::shl() {
   sr.status.carry = 0;
@@ -280,7 +258,7 @@ void VirtualMachine::shl() {
     sr.status.carry = 1;
   }
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::shla() {
   sr.status.carry = 0;
@@ -289,7 +267,7 @@ void VirtualMachine::shla() {
     sr.status.carry = 1;
   }   
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::shr() {
   sr.status.carry = 0;
@@ -298,7 +276,7 @@ void VirtualMachine::shr() {
   }
   r[ir.reg.rd] = r[ir.reg.rd] >> 1;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::shra() {
   sr.status.carry = 0;
@@ -307,7 +285,7 @@ void VirtualMachine::shra() {
     sr.status.carry = 1;
   } 
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::compr() {
   if (ir.imed.imed == 1) {
@@ -327,7 +305,7 @@ void VirtualMachine::compr() {
     sr.status.greater = 1;
   }
   clk += 1;  
-  print();      
+        
 }
 void VirtualMachine::compri() {
   sr.status.equal = 0;
@@ -343,43 +321,43 @@ void VirtualMachine::compri() {
     sr.status.greater = 1;
   } 
   clk += 1;  
-  print();  
+    
 }
 void VirtualMachine::getstat() {
   r[ir.reg.rd] = sr.instr;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::putstat() {
   sr.instr = r[ir.reg.rd];
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::jump() {
   pc = ir.addr.addr - 1 + base;
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::jumpl() {
   if (sr.status.less == 1) {
     pc = ir.addr.addr - 1 + base;
   }
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::jumpe() {
   if (sr.status.equal == 1) {
     pc = ir.addr.addr - 1 + base;
   }
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::jumpg() {
   if (sr.status.greater == 1) {
     pc = ir.addr.addr - 1 + base;
   }    
   clk += 1;
-  print();
+  
 }
 void VirtualMachine::call() {
   mem[sp--] = pc;
@@ -393,7 +371,7 @@ void VirtualMachine::call() {
   if ((255 - sp) > max_sp) {
     max_sp = 255 - sp;
   }
-  print();
+  
 }
 void VirtualMachine::ret() {
   sr.instr = mem[++sp];
@@ -403,14 +381,14 @@ void VirtualMachine::ret() {
   r[0] = mem[++sp];
   pc = mem[++sp];
   clk += 4;
-  print();
+  
 }
 void VirtualMachine::read() {
   sr.status.r_status = 6;
   sr.status.io_reg = ir.reg.rd;
   clk += 1;
   retn = true;
-  print();
+  
 }
  
 void VirtualMachine::read_helper(int read) {
@@ -422,7 +400,7 @@ void VirtualMachine::write() {
   sr.status.io_reg = ir.reg.rd;
   clk += 1;
   retn = true;
-  print();
+  
 }
  
 void VirtualMachine::write_helper(int write) {
@@ -433,15 +411,14 @@ void VirtualMachine::halt()  {
   pc = base + limit;
   sr.status.r_status = 1;
   endtimestamp = static_cast<long double> ( time(NULL) );
-  cout << "Halting\n";
   *out << "The clock count is: "  << clk << endl;
   clk += 1;
-  print();
+  
 }
  
 void VirtualMachine::noop() {
   clk += 1;
-  print();
+  
   return;
 }
  
@@ -463,7 +440,6 @@ void VirtualMachine::mem_load (fstream *loaded) {
 }
  
 void VirtualMachine::stack_save() {
-  assert(sp == 255);
   if (sp == 255) {
     return;
   }
