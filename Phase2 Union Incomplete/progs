@@ -1,1 +1,4 @@
-fact1.s
+io.s
+sub.s
+sum1.s
+sum2.s

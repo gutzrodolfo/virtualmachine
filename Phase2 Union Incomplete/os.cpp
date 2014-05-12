@@ -13,6 +13,7 @@ os.cpp
 #include <string>
 #include <iostream>
 #include <cassert>
+#include <unistd.h> 
 
 using namespace std;
 
@@ -29,25 +30,33 @@ os::os() {
         assembled.push_back(new Assembler(name.substr(0, name.size() - 2)));
         jobs.push_back(new PCB(name.substr(0, name.size() - 2)));
     }
+    psize = jobs.size(); contextclk = 0; finalclk = 0; useclk = 0;
+    idle = static_cast<long double> ( time(NULL) );
     as.close();
     VirtualMachine machine;
 }
 
 void os::decide() {
+    contextclk += 5;
     decide_run();
-    decide_wq();               
+    decide_wq();              
     decide_rq();        
 }
 
 void os::decide_run() {
     if (machine.sr.status.r_status == 1) {
+        running -> turntime = machine.endtimestamp - machine.timestamp;
+        useclk += running -> processclk;
+        running -> print();
         erase();
     }
     else if (machine.sr.status.r_status == 6 or machine.sr.status.r_status == 7) {
+        running -> wait_time  = static_cast<long double> ( time(NULL) ); 
         waitQ.push(running); 
     }
     else {
         readyQ.push(running);
+        running -> ready_time = static_cast<long double> ( time(NULL) );
     }
 }
 
@@ -62,6 +71,8 @@ void os::decide_wq() {
 
 void os::io() {
     PCB * temp = waitQ.front();
+    temp -> wait_time = static_cast<long double> ( time(NULL) ) - temp -> wait_time;
+    temp -> waitclk += 1000 * temp -> wait_time; 
     waitQ.pop();
     if (running -> sr.status.r_status == 6) {
         temp -> in >> temp -> read;
@@ -73,6 +84,7 @@ void os::io() {
         cout << "WaitQ writing " << temp -> registers[temp -> sr.status.io_reg] << endl;
         temp -> write = temp -> registers[temp -> sr.status.io_reg];
     }
+    temp -> ready_time = static_cast<long double> ( time(NULL) ); 
     readyQ.push(temp);
 }
 
@@ -81,6 +93,8 @@ void os::decide_rq() {
         return;
     }
     else {
+        running -> ready_time = static_cast<long double> (time(NULL) ) - running -> ready_time;
+        running -> readyclk += 1000 * running -> ready_time; 
         readyQ.pop();
         if (readyQ.empty()) {
             return;
@@ -132,6 +146,24 @@ void os::erase() {
     }
 }
 
+void os::timing() {
+    idle = static_cast<long double> ( time(NULL) ) - idle;
+    idle -= nonidle;
+    systime = idle + (contextclk/1000.0);
+    finalclk = useclk + (idle * 1000.0) + contextclk;
+    cpu_util = (finalclk - (idle * 1000.0))/finalclk * 100.0;
+    use_util = useclk/finalclk;
+    throughput = (idle + nonidle)/float(psize);
+}
+
+void os::print() {
+    fstream sysout; 
+    sysout.open("system.out", fstream::out); 
+    sysout << "The system time is " << systime << " seconds." << endl;
+    sysout << "The System CPU Utilization is " << cpu_util << " percent." << endl;
+    sysout << "The User CPU Utilization is " << use_util << endl;
+    sysout << "The throughput is " << throughput << " processes per second." << endl;
+}
 
 /************************************************************************
 This is the heart of the os it will handle the running of all processes
@@ -144,22 +176,28 @@ void os::run() {
         cout << running -> pname << " has resumed or is starting\n";
         if (running -> sr.status.r_status == 6) {
             machine.read_helper(running -> read);
+            running -> waitclk += 27;
             machine.sr.status.r_status = 0;
         }
         if (running -> sr.status.r_status == 7) {
             machine.write_helper(running -> write);
+            running -> waitclk += 27;
             machine.sr.status.r_status = 0;
         }
         cout << "it's starting pc is " << machine.pc << endl; 
+        long double startp = static_cast<long double> ( time(NULL) ); 
         machine.parse();
+        nonidle += (static_cast<long double> ( time(NULL) ) - startp);
         cout << "it's base is " << machine.base << " " << machine.limit << endl;
         machine.base = running -> base;
         cout << machine.sp << endl;
-        running -> modify(machine.r, machine.sr, machine.pc, machine.sp, machine.base,  machine.limit);
+        running -> modify(machine.r, machine.sr, machine.pc, machine.sp, machine.base,  machine.limit, machine.clk, machine.max_sp);
         decide();
         machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr.instr, 
-        running -> sp, running-> base, running -> limit, running -> registers); 
+        running -> sp, running-> base, running -> limit, running -> processclk, running -> stack, running -> registers); 
         assert(machine.st -> is_open());  
         machine.stack_load();     
     }
+    timing();
+    print();
 }

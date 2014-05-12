@@ -33,11 +33,16 @@ private:
 	codes sr;
 	string pname;
 	//Declaring the friend classes accounting info later
+	long double processclk, waitclk, readyclk;
+	int stack;
+	long double time, wait_time, ready_time;
+	int turntime;
 	friend class VirtualMachine;
 	friend class os;
 public:
 	PCB(string);
-	void modify(vector<int>, codes, int, int ,int, int);
+	void modify(vector<int>, codes, int, int ,int, int, long double, int);
+	void print();
 };
 
 #endif

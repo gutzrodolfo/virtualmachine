@@ -24,8 +24,10 @@ to have input and output. Finally, it needs some instructions.
 
 r = vector <int> (REG_FILE_SIZE);
 mem = vector <int> (MEM_SIZE);
-pc = 0;  base = 0; sr.instr = 0; sp = 255; ir.instr = 0;  clk = 0; limit = 0;
+pc = 0;  base = 0; sr.instr = 0; sp = 255; ir.instr = 0;  clk = 0; limit = 0; max_sp = 0;
 retn = false;
+timestamp = static_cast<long double> ( time(NULL) ); 
+cout << timestamp << " is the start time"; 
 
 /********************************************
 These are the functions that will called 
@@ -91,7 +93,7 @@ void VirtualMachine::parse() {
     } 
   }
 }
-void VirtualMachine::change(fstream * a, fstream * b, fstream * c, fstream * d, int t, int v, int w, int x, int y, vector<int> vec) {
+void VirtualMachine::change(fstream * a, fstream * b, fstream * c, fstream * d, int t, int v, int w, int x, int y, int clk, int max_sp, vector<int> vec) {
   this -> in = a; 
   this -> o = b; 
   this -> st = c; 
@@ -102,6 +104,8 @@ void VirtualMachine::change(fstream * a, fstream * b, fstream * c, fstream * d, 
   this -> sp = w; 
   this -> base = x;
   this -> limit = y; 
+  this -> clk = clk;
+  this -> max_sp = max_sp;
 
   this -> r = vec;
 }
@@ -349,6 +353,9 @@ void VirtualMachine::call() {
   mem[sp--] = sr.instr;
   pc = ir.addr.addr - 1;
   clk += 4;
+  if ((255 - sp) > max_sp) {
+    max_sp = 255 - sp;
+  }
 }
 void VirtualMachine::ret() {
   sr.instr = mem[++sp]; 
@@ -363,7 +370,7 @@ void VirtualMachine::ret() {
 void VirtualMachine::read() {
   sr.status.r_status = 6;
   sr.status.io_reg = ir.reg.rd;
-  clk += 28;
+  clk += 1;
   retn = true; 
 }
 
@@ -374,8 +381,9 @@ void VirtualMachine::read_helper(int read) {
 void VirtualMachine::write() {
   sr.status.r_status = 7;
   sr.status.io_reg = ir.reg.rd;
-  clk += 28;
+  clk += 1;
   retn = true; 
+
 }
 
 void VirtualMachine::write_helper(int write) {
@@ -385,6 +393,8 @@ void VirtualMachine::write_helper(int write) {
 void VirtualMachine::halt()  {
   pc = base + limit;
   sr.status.r_status = 1;
+  endtimestamp = static_cast<long double> ( time(NULL) );
+  cout << endtimestamp << "is the endtime" << endl;
   *out << "The clock count is: "  << clk << endl;
   clk += 1;
 } 

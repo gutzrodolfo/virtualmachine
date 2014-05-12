@@ -26,7 +26,8 @@ private:
   vector <int> r;
   vector <int> mem;
   int pc, clk, sp, base, limit; 
-  int carry;
+  int carry, max_sp;
+  long double timestamp, endtimestamp; 
   codes ir, sr;
   typedef void (VirtualMachine::*function)();
   map<int, function> functions;
@@ -37,7 +38,7 @@ private:
 public:
   VirtualMachine();
   //These are all available operation by the VM
-  void change( fstream *, fstream *, fstream *, fstream *, int, int, int, int, int, vector<int> ); 
+  void change( fstream *, fstream *, fstream *, fstream *, int, int, int, int, int, int, int, vector<int> ); 
   void parse(); 
   void load();
   void loadi();
