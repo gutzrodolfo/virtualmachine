@@ -26,12 +26,16 @@ PCB::PCB(string filename) {
 	name = filename + ".o";
 	o.open(name.c_str(), fstream::in);
 	name = filename + ".st";
-	st.open(name.c_str(), fstream::in | fstream::out);
+	st.open(name.c_str(), fstream::out | fstream::in);
+	st.close();
+	st.open(name.c_str(), fstream::out | fstream::in);
 	name = filename + ".out";
 	out.open(name.c_str(), fstream::out);
-	assert(out.is_open());
+	assert(o.is_open());
 	pname = filename;
 	registers = vector <int> (4);
+	assert(st.is_open());
+	pc = 0;  base = 0; sp = 255; limit = 0;
 }
 
 void PCB::modify(vector<int> registers, codes sr, int pc, int sp, int base,  int limit) {

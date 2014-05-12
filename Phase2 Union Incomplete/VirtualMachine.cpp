@@ -11,6 +11,7 @@ VirtualMachine.cpp
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <cassert>
 
 using namespace std;
 
@@ -74,8 +75,16 @@ void VirtualMachine::parse() {
   for(; pc < base + limit; pc++) {
     ir.instr = mem[pc];
     cout << "The PC is " << pc << endl;
-    (*this.*functions[ir.reg.opcode])();
+    cout << "The stack pointer is " << sp << endl;
+    if (sr.status.r_status == 6 or sr.status.r_status == 7) {
+      pc--;
+    }
+    else {
+      (*this.*functions[ir.reg.opcode])();
+      cout << "R[0] = " << r[0] << " R[1] = " << r[1] << " R[2] = " << r[2] << " R[3] = " << r[3] << endl;
+    }
     if (retn) {
+      stack_save();
       retn = false;
       return; 
     } 
@@ -129,7 +138,6 @@ void VirtualMachine::add() {
     sr.status.carry = 1;
   }
   r[ir.reg.rd] = test;
-  cout << "Added = " << r[ir.reg.rd] << endl;
   clk += 1;
 }
 void VirtualMachine::addi() {
@@ -248,18 +256,42 @@ void VirtualMachine::negate() {
 }
 void VirtualMachine::shl() {
   r[ir.reg.rd] = r[ir.reg.rd] << 1;
+  if (r[ir.reg.rd] > 128 ) {
+    sr.status.carry = 1;
+  }  
+  else {
+    sr.status.carry = 0;
+  }  
   clk += 1;
 }
 void VirtualMachine::shla() {
   r[ir.reg.rd] = r[ir.reg.rd] *= 2;
+  if (r[ir.reg.rd] > 128 ) {
+    sr.status.carry = 1;
+  }  
+  else {
+    sr.status.carry = 0;
+  }    
   clk += 1;
 }
 void VirtualMachine::shr() {
-  r[ir.reg.rd] = r[ir.reg.rd] >> 1;
+  if (r[ir.reg.rd] > 128 or r[ir.reg.rd] < -128) {
+    sr.status.carry = 1;
+  }  
+  else {
+    sr.status.carry = 0;
+  }   
+  r[ir.reg.rd] = r[ir.reg.rd] >> 1; 
   clk += 1;
 }
 void VirtualMachine::shra() { 
   r[ir.reg.rd] = r[ir.reg.rd] /= 2;
+  if (r[ir.reg.rd] > 128 or r[ir.reg.rd] < -128) {
+    sr.status.carry = 1;
+  }  
+  else {
+    sr.status.carry = 0;
+  }    
   clk += 1;
 }
 void VirtualMachine::compr() {
@@ -354,9 +386,7 @@ void VirtualMachine::read() {
 }
 
 void VirtualMachine::read_helper(int read) {
-  cout << "Read " << read << endl;
   r[sr.status.io_reg] = read;
-  cout << "reg " << r[sr.status.io_reg] << endl;
 }
 
 void VirtualMachine::write() {
@@ -367,7 +397,6 @@ void VirtualMachine::write() {
 }
 
 void VirtualMachine::write_helper(int write) {
-  cout << write << "is writing " << endl;
   *out << write << endl;
 }
 
@@ -377,6 +406,7 @@ void VirtualMachine::halt()  {
   *out << "The clock count is: "  << clk << endl;
   clk += 1;
 } 
+
 void VirtualMachine::noop() {
   clk += 1;
   return;
@@ -397,4 +427,20 @@ void VirtualMachine::mem_load (fstream *loaded) {
   }
   pc = base;
   base -= limit;
+}
+
+void VirtualMachine::stack_save() {
+  assert(sp == 255);
+  if (sp == 255) {
+    return;
+  }
+  for(int i = this -> sp; i < 256; i++) {
+    *st << mem[i];
+  }
+}
+
+void VirtualMachine::stack_load() {
+  for (int stack = 255; stack >= sp; stack--) {
+    *st >> mem[stack];
+  }
 }

@@ -34,16 +34,13 @@ os::os() {
 }
 
 void os::decide() {
-    decide_wq();       
-    decide_run();        
+    decide_run();
+    decide_wq();               
     decide_rq();        
 }
 
 void os::decide_run() {
     if (machine.sr.status.r_status == 1) {
-        if (jobs.size() == 1) {
-            decide_wq();
-        }
         erase();
     }
     else if (machine.sr.status.r_status == 6 or machine.sr.status.r_status == 7) {
@@ -66,14 +63,14 @@ void os::decide_wq() {
 void os::io() {
     PCB * temp = waitQ.front();
     waitQ.pop();
-    if (machine.sr.status.r_status == 6) {
+    if (running -> sr.status.r_status == 6) {
         temp -> in >> temp -> read;
-        cout << "Reading from process" << temp -> pname << endl;
-        cout << "ReadFirst " << temp -> read << endl;
+        cout << "In waitQ " << temp -> pname << endl;
+        cout << "Wait Q Read " << temp -> read << endl;
     }
-    else if (machine.sr.status.r_status == 7) {
-        cout << "Write to process" << temp -> pname << endl;
-        cout << "to write" <<temp -> registers[temp -> sr.status.io_reg] << endl;
+    else if (running -> sr.status.r_status == 7) {
+        cout << "In waitQ " << temp -> pname << endl;
+        cout << "WaitQ writing " << temp -> registers[temp -> sr.status.io_reg] << endl;
         temp -> write = temp -> registers[temp -> sr.status.io_reg];
     }
     readyQ.push(temp);
@@ -144,19 +141,23 @@ processes are finished.
 *************************************************************************/
 void os::run() {
     while (!jobs.empty()){
-        if (machine.sr.status.r_status == 6) {
+        cout << running -> pname << " has resumed or is starting\n";
+        if (running -> sr.status.r_status == 6) {
             machine.read_helper(running -> read);
             machine.sr.status.r_status = 0;
         }
-        else if (machine.sr.status.r_status == 7) {
+        if (running -> sr.status.r_status == 7) {
             machine.write_helper(running -> write);
             machine.sr.status.r_status = 0;
         }
         machine.parse();
         machine.base = running -> base;
+        cout << machine.sp << endl;
         running -> modify(machine.r, machine.sr, machine.pc + 1, machine.sp, machine.base,  machine.limit);
         decide();
         machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr.instr, 
-        running -> sp, running-> base, running -> limit, running -> registers);        
+        running -> sp, running-> base, running -> limit, running -> registers); 
+        assert(machine.st -> is_open());  
+        machine.stack_load();     
     }
 }

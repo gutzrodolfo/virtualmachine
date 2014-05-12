@@ -78,5 +78,7 @@ public:
   void overflow(int, int);
 //  bool error();
   void mem_load(fstream *);
+  void stack_save();
+  void stack_load();
 };
 #endif
