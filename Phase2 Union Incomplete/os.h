@@ -25,7 +25,7 @@ private:
 	list <PCB *> jobs;
 	queue <PCB *> readyQ, waitQ;
 	PCB * running;
-	int psize;
+	into psize;
 	long double contextclk, finalclk, systime, useclk;
 	long double idle, nonidle;
 	long double cpu_util, use_util, throughput;
