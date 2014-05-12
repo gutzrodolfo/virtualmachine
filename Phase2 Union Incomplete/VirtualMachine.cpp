@@ -85,6 +85,7 @@ void VirtualMachine::parse() {
     }
     if (retn) {
       stack_save();
+      pc++;
       retn = false;
       return; 
     } 
@@ -116,15 +117,15 @@ void VirtualMachine::load() {
     loadi();
     return;
   }
-  r[ir.reg.rd] = mem[ir.addr.addr];
+  r[ir.addr.rd] = mem[ir.addr.addr];
   clk += 4;
 }
 void VirtualMachine::loadi() {
-  r[ir.reg.rd] = ir.imed.constant;
+  r[ir.imed.rd] = ir.imed.constant;
   clk += 1;
 }
 void VirtualMachine::store() {
-  mem[ir.addr.addr] = r[ir.reg.rd];
+  mem[ir.addr.addr] = r[ir.addr.rd];
   clk += 4;
 }
 void VirtualMachine::add() {
@@ -137,15 +138,16 @@ void VirtualMachine::add() {
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
   }
-  r[ir.reg.rd] = test;
+  r[ir.reg.rd] = r[ir.reg.rd] + r[ir.reg.rs];
   clk += 1;
 }
 void VirtualMachine::addi() {
-  int test = r[ir.reg.rd] + ir.imed.constant;
+  sr.status.carry = 0;
+  int test = r[ir.imed.rd] + ir.imed.constant;
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
   }
-  r[ir.reg.rd] = test;
+  r[ir.reg.rd] = r[ir.imed.rd] + ir.imed.constant;
   clk += 1;
 }
 void VirtualMachine::addc() {
@@ -153,25 +155,21 @@ void VirtualMachine::addc() {
     addci();
     return;
   } 
+  sr.status.carry = 0;
   int test = r[ir.reg.rd] + r[ir.reg.rs] + carry;
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
-  }  
-  else {
-    sr.status.carry = 0;
   } 
-  r[ir.reg.rd] = test;
+  r[ir.reg.rd] = r[ir.reg.rd] + r[ir.reg.rs] + carry;
   clk += 1;
 }
 void VirtualMachine::addci() {
-  int test = r[ir.reg.rd] + ir.imed.constant + carry;
+  sr.status.carry = 0;
+  int test = r[ir.imed.rd] + ir.imed.constant + carry;
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
-  }  
-  else {
-    sr.status.carry = 0;
-  } 
-  r[ir.reg.rd] = test;
+  }
+  r[ir.reg.rd] = r[ir.imed.rd] + ir.imed.constant + carry;
   clk += 1;
 }
 void VirtualMachine::sub() {
@@ -179,25 +177,21 @@ void VirtualMachine::sub() {
     subi();
     return;
   }
+  sr.status.carry = 0;
   int test = r[ir.reg.rd] - r[ir.reg.rs];
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
-  }  
-  else {
-    sr.status.carry = 0;
-  } 
-  r[ir.reg.rd] = test;
+  }
+  r[ir.reg.rd] = r[ir.reg.rd] - r[ir.reg.rs];
   clk += 1;
 }
 void VirtualMachine::subi() {
-  int test = r[ir.reg.rd] - ir.imed.constant;
+  sr.status.carry = 0;
+  int test = r[ir.imed.rd] - ir.imed.constant;
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
-  }   
-  else {
-    sr.status.carry = 0;
   }
-  r[ir.reg.rd] = test;
+  r[ir.reg.rd] = r[ir.imed.rd] - ir.imed.constant;
   clk += 1;
 }
 void VirtualMachine::subc() {
@@ -205,25 +199,21 @@ void VirtualMachine::subc() {
     subci();
     return;
   }
+  sr.status.carry = 0;
   int test = r[ir.reg.rd] - r[ir.reg.rs] - carry;
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
-  }  
-  else {
-    sr.status.carry = 0;
-  } 
-  r[ir.reg.rd] = test;
+  }
+  r[ir.reg.rd] = r[ir.reg.rd] - r[ir.reg.rs] - carry;
   clk += 1;
 }
 void VirtualMachine::subci() {
-  int test = r[ir.reg.rd] - ir.imed.constant - carry;
+  sr.status.carry = 0;
+  int test = r[ir.imed.rd] - ir.imed.constant - carry;
   if (test > 128 or test < -128) {
     sr.status.carry = 1;
   }  
-  else {
-    sr.status.carry = 0;
-  }  
-  r[ir.reg.rd] = test;
+  r[ir.reg.rd] = r[ir.imed.rd] - ir.imed.constant - carry;
   clk += 1;
 }
 void VirtualMachine::ander() {
@@ -235,7 +225,7 @@ void VirtualMachine::ander() {
   clk += 1;
 }
 void VirtualMachine::andi() {
-  r[ir.reg.rd] = r[ir.reg.rd] & ir.imed.constant;
+  r[ir.reg.rd] = r[ir.imed.rd] & ir.imed.constant;
   clk += 1;
 }
 void VirtualMachine::xorer() {
@@ -247,7 +237,7 @@ void VirtualMachine::xorer() {
   clk += 1;
 }
 void VirtualMachine::xori() {
-  r[ir.reg.rd] = r[ir.reg.rd] ^ ir.imed.constant;
+  r[ir.reg.rd] = r[ir.imed.rd] ^ ir.imed.constant;
   clk += 1;
 }
 void VirtualMachine::negate() {
@@ -255,43 +245,35 @@ void VirtualMachine::negate() {
   clk += 1;
 }
 void VirtualMachine::shl() {
+  sr.status.carry = 0;
   r[ir.reg.rd] = r[ir.reg.rd] << 1;
   if (r[ir.reg.rd] > 128 ) {
     sr.status.carry = 1;
-  }  
-  else {
-    sr.status.carry = 0;
-  }  
+  } 
   clk += 1;
 }
 void VirtualMachine::shla() {
+  sr.status.carry = 0;
   r[ir.reg.rd] = r[ir.reg.rd] *= 2;
   if (r[ir.reg.rd] > 128 ) {
     sr.status.carry = 1;
-  }  
-  else {
-    sr.status.carry = 0;
   }    
   clk += 1;
 }
 void VirtualMachine::shr() {
-  if (r[ir.reg.rd] > 128 or r[ir.reg.rd] < -128) {
+  sr.status.carry = 0;
+  if (r[ir.reg.rd] % 2 == 1) {
     sr.status.carry = 1;
-  }  
-  else {
-    sr.status.carry = 0;
-  }   
+  } 
   r[ir.reg.rd] = r[ir.reg.rd] >> 1; 
   clk += 1;
 }
 void VirtualMachine::shra() { 
+  sr.status.carry = 0;
   r[ir.reg.rd] = r[ir.reg.rd] /= 2;
-  if (r[ir.reg.rd] > 128 or r[ir.reg.rd] < -128) {
+  if (r[ir.reg.rd] % 2 == 1) {
     sr.status.carry = 1;
-  }  
-  else {
-    sr.status.carry = 0;
-  }    
+  }   
   clk += 1;
 }
 void VirtualMachine::compr() {
@@ -317,13 +299,13 @@ void VirtualMachine::compri() {
   sr.status.equal = 0;
   sr.status.less = 0;
   sr.status.greater = 0;
-  if (r[ir.reg.rd] == ir.imed.constant) {
+  if (r[ir.imed.rd] == ir.imed.constant) {
     sr.status.equal = 1;
   }
-  if (r[ir.reg.rd] < ir.imed.constant) {
+  if (r[ir.imed.rd] < ir.imed.constant) {
     sr.status.less = 1;
   }
-  if (r[ir.reg.rd] > ir.imed.constant) {
+  if (r[ir.imed.rd] > ir.imed.constant) {
     sr.status.greater = 1;
   }  
   clk += 1;	  	
@@ -359,13 +341,12 @@ void VirtualMachine::jumpg() {
   clk += 1;
 }
 void VirtualMachine::call() {
-  mem[sp] = pc;
-  mem[--sp] = r[0];
-  mem[--sp] = r[1];
-  mem[--sp] = r[2];
-  mem[--sp] = r[3];
-  mem[--sp] = sr.instr;
-  sp--;
+  mem[sp--] = pc;
+  mem[sp--] = r[0];
+  mem[sp--] = r[1];
+  mem[sp--] = r[2];
+  mem[sp--] = r[3];
+  mem[sp--] = sr.instr;
   pc = ir.addr.addr - 1;
   clk += 4;
 }
@@ -376,6 +357,7 @@ void VirtualMachine::ret() {
   r[1] = mem[++sp];
   r[0] = mem[++sp];
   pc = mem[++sp];
+  cout << "stats are pc: " <<  pc;
   clk += 4;
 }
 void VirtualMachine::read() {

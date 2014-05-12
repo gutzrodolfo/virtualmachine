@@ -150,10 +150,12 @@ void os::run() {
             machine.write_helper(running -> write);
             machine.sr.status.r_status = 0;
         }
+        cout << "it's starting pc is " << machine.pc << endl; 
         machine.parse();
+        cout << "it's base is " << machine.base << " " << machine.limit << endl;
         machine.base = running -> base;
         cout << machine.sp << endl;
-        running -> modify(machine.r, machine.sr, machine.pc + 1, machine.sp, machine.base,  machine.limit);
+        running -> modify(machine.r, machine.sr, machine.pc, machine.sp, machine.base,  machine.limit);
         decide();
         machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr.instr, 
         running -> sp, running-> base, running -> limit, running -> registers); 
