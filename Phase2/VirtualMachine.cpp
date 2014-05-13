@@ -63,18 +63,32 @@ functions[25] = &VirtualMachine::noop;
  
 }
  
-/************************************************************
-This can be considered the main function of the program as it
-parses through the instructions after they have been loaded on
-to the VM. It handle the program counter and call the
-corresponding instruction.
-*************************************************************/
-void VirtualMachine::parse() {
+/***************************************************************************************
+This can be considered the main function of the program as it parses through the 
+instructions after they have been loaded on to the VM. It handle the program counter and 
+calla the corresponding instruction. It will also stop when there is a stop condition. 
+Additionally for good measure it will add stack_saving and loading.
+***************************************************************************************/
+void VirtualMachine::parse(int read, int write) {
   int timeslice = vm_clk;
+  stack_load(); 
   for(; pc < base + limit; ) {  
+    if (sr.status.r_status == 6) {
+      read_helper(read);
+      sr.status.r_status = 0;
+    }
+    if (sr.status.r_status == 7) {
+      write_helper(write);
+      sr.status.r_status = 0;
+    }
     ir.instr = mem[pc];
     (*this.*functions[ir.reg.opcode])();
     pc++;
+    if ((vm_clk - timeslice) >= 100) {
+      vm_clk += 15;
+      retn = true;
+    }
+    invalid_opcode();
     cout << pc << endl;
     if (retn) {
       stack_save();
@@ -83,6 +97,11 @@ void VirtualMachine::parse() {
     }
   }
 }
+
+/*************************************************************************
+This is used to switch between processes by the the VM with this the VM 
+shall be able to stop a process and resume it as the program moves forward.
+**************************************************************************/
 void VirtualMachine::change(fstream * a, fstream * b, fstream * c, fstream * d, int t, int v, int w, int x, int y, int clk, int max_sp, vector<int> vec) {
   this -> in = a;
   this -> o = b;
@@ -378,6 +397,7 @@ void VirtualMachine::jumpg() {
 }
 void VirtualMachine::call() {
   mem[sp--] = pc;
+  cout << "The call PC is " << pc << endl;
   mem[sp--] = r[0];
   mem[sp--] = r[1];
   mem[sp--] = r[2];
@@ -397,29 +417,35 @@ void VirtualMachine::ret() {
   r[1] = mem[++sp];
   r[0] = mem[++sp];
   pc = mem[++sp];
+  cout << "The return PC is " << mem[sp] << endl;
   clk += 4;
   vm_clk += 4;
 }
+
+//Passing read instruction to the OS
 void VirtualMachine::read() {
   sr.status.r_status = 6;
   sr.status.io_reg = ir.reg.rd;
   clk += 1;
-  vm_clk += 4; //Due to time slice 
+  vm_clk += 1;
   retn = true;
 }
- 
+
+//Read occuring when OS passes the read info 
 void VirtualMachine::read_helper(int read) {
   r[sr.status.io_reg] = read;
 }
- 
+
+//Passing write instruction to the OS 
 void VirtualMachine::write() {
   sr.status.r_status = 7;
   sr.status.io_reg = ir.reg.rd;
   clk += 1;
-  vm_clk += 4; //Due to time slice
+  vm_clk += 1;
   retn = true;
 }
- 
+
+//Write occuring when OS passes the write info
 void VirtualMachine::write_helper(int write) {
   *out << write << endl;
 }
@@ -439,7 +465,11 @@ void VirtualMachine::noop() {
   return;
 }
  
-//Function added to share between processes
+/*************************************************************************
+All the processes will be loaded by OS into the VM by this program by using
+this program the VM will have everything loaded into memory by the time that
+the program needs to run.
+**************************************************************************/
 void VirtualMachine::mem_load (fstream *loaded) {
   o = loaded;
   base = pc;
@@ -456,20 +486,35 @@ void VirtualMachine::mem_load (fstream *loaded) {
   base -= limit;
 }
  
+/*************************************************************************
+Two functions these are used to save and load to the stack. Thereby growing
+or shrinking it. Depending on the proces that is running.
+**************************************************************************/
 void VirtualMachine::stack_save() {
   if (sp == 255) {
     return;
   }
-  for(int i = this -> sp; i < 256; i++) {
-    *st << mem[i];
+  st -> clear();
+  st -> seekg(0, ios::beg);
+  for(int i = this -> sp + 1; i < 256; i++) {
+    *st << mem[i] << endl;
   }
 }
  
 void VirtualMachine::stack_load() {
-  for (int stack = 255; stack >= sp; stack--) {
+  st -> clear();
+  st -> seekg(0, ios::beg);
+  for (int stack = sp + 1; stack < 256; stack++) {
     *st >> mem[stack];
   }
 }
+
+/*************************************************************************
+Overflow error functions these handle any errors that are given created by
+the computer. If there is ever an error that leads to this programs will 
+simply stop executing and do no more the rest of the programs will continue
+as usual.
+**************************************************************************/
 void VirtualMachine::overflow_add(int x, int y) {
   int z = x + y;
   if ((z - x) != y or (z - y) != x) {
@@ -483,5 +528,17 @@ void VirtualMachine::overflow_shift(int x) {
   if (x != (z/2)) {
   sr.status.r_status = 2;
   retn = true;
+  }
+}
+
+/*************************************************************************
+Detects an invalid opcode and immediately sends a return status that will
+terminate the program nothing more will be done by the program as writer of
+the program needs to first fix it.
+**************************************************************************/
+void VirtualMachine::invalid_opcode() {
+  if (ir.reg.opcode > 25 or ir.reg.opcode < 0) {
+    sr.status.r_status = 5;
+    retn = true;
   }
 }

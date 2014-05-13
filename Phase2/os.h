@@ -1,3 +1,12 @@
+/**********************************************
+Phase 2 Project
+Groupmates: Eli Gonzalez & Rodolfo Gutierrez
+Date:       04/21/2014
+Class:      CSE 460 
+
+os.h
+**********************************************/
+
 #ifndef os_H
 #define os_H
 

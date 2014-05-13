@@ -1,8 +1,8 @@
 40320
-The clock count is: 1295
+The clock count is: 1169
 *** Process Specific Info ***
-The CPU time is 1296 number of clock ticks
-The Waiting time is 1684 number of clock ticks
-The Turnaround time is 2.926 number of seconds
+The CPU time is 1170 number of clock ticks
+The Waiting time is 2069 number of clock ticks
+The Turnaround time is 3.344 number of seconds
 The I/O time is 54 number of clock ticks
 The largest stack size is 48

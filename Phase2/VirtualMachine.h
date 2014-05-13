@@ -1,5 +1,5 @@
 /**********************************************
-Phase 1 Project
+Phase 2 Project
 Groupmates: Eli Gonzalez & Rodolfo Gutierrez
 Date:       04/21/2014
 Class:      CSE 460 
@@ -39,7 +39,7 @@ public:
   VirtualMachine();
   //These are all available operation by the VM
   void change( fstream *, fstream *, fstream *, fstream *, int, int, int, int, int, int, int, vector<int> ); 
-  void parse(); 
+  void parse(int, int); 
   void load();
   void loadi();
   void store();
@@ -83,5 +83,6 @@ public:
   void overflow_add(int, int);
   void overflow_shift(int);
   void underflow();
+  void invalid_opcode();
 };
 #endif

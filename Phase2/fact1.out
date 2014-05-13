@@ -1,8 +1,8 @@
 720
-The clock count is: 931
+The clock count is: 1057
 *** Process Specific Info ***
-The CPU time is 932 number of clock ticks
-The Waiting time is 2031 number of clock ticks
-The Turnaround time is 2.925 number of seconds
+The CPU time is 1058 number of clock ticks
+The Waiting time is 2173 number of clock ticks
+The Turnaround time is 3.337 number of seconds
 The I/O time is 54 number of clock ticks
 The largest stack size is 36

@@ -30,6 +30,10 @@ os::os() {
     contextclk = 0; idleclk = 0;
 }
 
+/*******************************************************************
+The decide functions these handle two things the switching between 
+tasks and placing the them in the WaitQ for file I/O.
+********************************************************************/
 void os::decide() {
     contextclk += 5;
     decide_run();
@@ -59,6 +63,18 @@ void os::decide_run() {
 
 }
 
+//Erase function used by decide_run() to erase a process
+void os::erase() {
+    PCB * temp;
+    for (list<PCB *>::iterator it = jobs.begin(); it != jobs.end(); it++) {
+        temp = *it;
+        if(running ->pname == temp -> pname) {
+            jobs.erase(it);
+        return;
+        }
+    }
+}
+
 void os::decide_wq() {
     if (waitQ.empty()) {
         return;
@@ -68,15 +84,18 @@ void os::decide_wq() {
     }
 }
 
+//A helper function for the decide_wq function
 void os::io() {
     PCB * temp = waitQ.front();
     temp -> waitclk += (machine.vm_clk - running -> before_wq);
     waitQ.pop();
     if (running -> sr.status.r_status == 6) {
         temp -> in >> temp -> read;
+        temp -> waitclk += 27;
     }
     else if (running -> sr.status.r_status == 7) {
         temp -> write = temp -> registers[temp -> sr.status.io_reg];
+        temp -> waitclk += 27;
     }
     temp -> before_rq = machine.vm_clk;
     readyQ.push(temp);
@@ -129,17 +148,10 @@ void os::load() {
 }
 
 
-void os::erase() {
-    PCB * temp;
-    for (list<PCB *>::iterator it = jobs.begin(); it != jobs.end(); it++) {
-        temp = *it;
-        if(running ->pname == temp -> pname) {
-            jobs.erase(it);
-	    return;
-        }
-    }
-}
-
+/************************************************************************
+Used to print out the system information so that the user know what was 
+done by the OS.
+*************************************************************************/
 void os::print() {
     fstream sysout;
     sysout.open("system.out", fstream::out);
@@ -158,24 +170,14 @@ processes are finished.
 *************************************************************************/
 void os::run() {
     while (!jobs.empty()){
-        if (running -> sr.status.r_status == 6) {
-            machine.read_helper(running -> read);
-            running -> waitclk += 27;
-            machine.sr.status.r_status = 0;
-        }
-        if (running -> sr.status.r_status == 7) {
-            machine.write_helper(running -> write);
-            running -> waitclk += 27;
-            machine.sr.status.r_status = 0;
-        }
+        machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr.instr, 
+        running -> sp, running-> base, running -> limit, running -> processclk, running -> stack, running -> registers); 
         cout << running -> pname << endl;
         cout << running -> base << running-> limit << endl;
-        machine.parse();
+        machine.parse(running -> read, running -> write);
         running -> modify(machine.r, machine.sr, machine.pc, machine.sp, machine.clk, machine.max_sp);
-        decide();
-        machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr.instr, 
-        running -> sp, running-> base, running -> limit, running -> processclk, running -> stack, running -> registers);   
-        machine.stack_load();     
+        decide(); 
+        cout << "The running PC after decide is " << running -> pc;     
     }
     print();
 }
