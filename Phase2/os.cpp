@@ -8,8 +8,6 @@ os.cpp
 **********************************************/
 
 #include "os.h"
-#include <unistd.h> 
-#include <stdlib.h> 
 
 using namespace std;
 
@@ -26,10 +24,10 @@ os::os() {
         assembled.push_back(new Assembler(name.substr(0, name.size() - 2)));
         jobs.push_back(new PCB(name.substr(0, name.size() - 2)));
     }
-    psize = jobs.size(); contextclk = 0; finalclk = 0; useclk = 0;
-    idle = static_cast<long double> ( time(NULL) );
+    psize = jobs.size();
     as.close();
     VirtualMachine machine;
+    contextclk = 0; idleclk = 0;
 }
 
 void os::decide() {
@@ -41,18 +39,22 @@ void os::decide() {
 
 void os::decide_run() {
     if (machine.sr.status.r_status == 1) {
-        running -> turntime = machine.endtimestamp - machine.timestamp;
-        useclk += running -> processclk;
-        running -> print();
+        cout << "The final wait clock is "<< running -> readyclk << endl;
+        running -> print(machine.vm_clk);
+        idleclk += running -> readyclk + running -> waitclk;
         erase();
     }
+    else if (machine.sr.status.r_status == 2 or machine.sr.status.r_status == 3 or machine.sr.status.r_status == 4 
+        or machine.sr.status.r_status == 5) {
+        erase();//Error has occured
+    }
     else if (machine.sr.status.r_status == 6 or machine.sr.status.r_status == 7) {
-        running -> wait_time  = static_cast<long double> ( time(NULL) ); 
+        running -> before_wq = machine.vm_clk;
         waitQ.push(running); 
     }
     else {
+        running -> before_rq = machine.vm_clk;
         readyQ.push(running);
-        running -> ready_time = static_cast<long double> ( time(NULL) );
     }
 
 }
@@ -68,8 +70,7 @@ void os::decide_wq() {
 
 void os::io() {
     PCB * temp = waitQ.front();
-    temp -> wait_time = static_cast<long double> ( time(NULL) ) - temp -> wait_time;
-    temp -> waitclk += 1000 * temp -> wait_time; 
+    temp -> waitclk += (machine.vm_clk - running -> before_wq);
     waitQ.pop();
     if (running -> sr.status.r_status == 6) {
         temp -> in >> temp -> read;
@@ -77,7 +78,7 @@ void os::io() {
     else if (running -> sr.status.r_status == 7) {
         temp -> write = temp -> registers[temp -> sr.status.io_reg];
     }
-    temp -> ready_time = static_cast<long double> ( time(NULL) ); 
+    temp -> before_rq = machine.vm_clk;
     readyQ.push(temp);
 }
 
@@ -86,14 +87,13 @@ void os::decide_rq() {
         return;
     }
     else {
-        running -> ready_time = static_cast<long double> (time(NULL) ) - running -> ready_time;
-        running -> readyclk += 1000 * running -> ready_time; 
         readyQ.pop();
         if (readyQ.empty()) {
             return;
         }
         else {
             running = readyQ.front();
+            running -> readyclk += (machine.vm_clk - (running -> before_rq));//Getting the clock for the wait times
         }
     }
 }
@@ -140,23 +140,13 @@ void os::erase() {
     }
 }
 
-void os::timing() {
-    idle = static_cast<long double> ( time(NULL) ) - idle;
-    idle -= nonidle;
-    systime = idle + (contextclk/1000.0);
-    finalclk = useclk + (idle * 1000.0) + contextclk;
-    cpu_util = (finalclk - (idle * 1000.0))/finalclk * 100.0;
-    use_util = useclk/finalclk;
-    throughput = (idle + nonidle)/float(psize);
-}
-
 void os::print() {
-    fstream sysout; 
-    sysout.open("system.out", fstream::out); 
-    sysout << "The system time is " << systime << " seconds." << endl;
-    sysout << "The System CPU Utilization is " << cpu_util << " percent." << endl;
-    sysout << "The User CPU Utilization is " << use_util << endl;
-    sysout << "The throughput is " << throughput << " processes per second." << endl;
+    fstream sysout;
+    sysout.open("system.out", fstream::out);
+    sysout << "The system time is " << contextclk + idleclk << " clock ticks.\n";
+    sysout << "The system CPU Utilization is " << (float(machine.vm_clk) + float(contextclk))/(float(contextclk) + float(machine.vm_clk) + float(idleclk)) * 100 << " percent.\n";
+    sysout << "Throughput is " << float(psize)/((float(machine.vm_clk) + float(contextclk) + float(idleclk))/1000) << " processes per second.\n";
+    sysout.close();
 }
 
 /************************************************************************
@@ -177,15 +167,14 @@ void os::run() {
             running -> waitclk += 27;
             machine.sr.status.r_status = 0;
         }
-        long double startp = static_cast<long double> ( time(NULL) ); 
+        cout << running -> pname << endl;
+        cout << running -> base << running-> limit << endl;
         machine.parse();
-        nonidle += (static_cast<long double> ( time(NULL) ) - startp);
         running -> modify(machine.r, machine.sr, machine.pc, machine.sp, machine.clk, machine.max_sp);
         decide();
         machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr.instr, 
         running -> sp, running-> base, running -> limit, running -> processclk, running -> stack, running -> registers);   
         machine.stack_load();     
     }
-    timing();
     print();
 }

@@ -25,7 +25,7 @@ private:
   static const int MEM_SIZE = 256;
   vector <int> r;
   vector <int> mem;
-  int pc, clk, sp, base, limit; 
+  int pc, clk, sp, base, limit, vm_clk; 
   int carry, max_sp;
   long double timestamp, endtimestamp; 
   codes ir, sr;
@@ -80,5 +80,8 @@ public:
   void mem_load(fstream *);
   void stack_save();
   void stack_load();
+  void overflow_add(int, int);
+  void overflow_shift(int);
+  void underflow();
 };
 #endif
