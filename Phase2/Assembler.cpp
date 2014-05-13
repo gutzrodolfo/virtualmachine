@@ -1,51 +1,16 @@
 /**********************************************
-Phase 2 Project
+Phase 1 Project
 Groupmates: Eli Gonzalez & Rodolfo Gutierrez
-Date: 	    04/30/2014
+Date: 	    04/21/2014
 Class:	    CSE 460 
 
 Assembler.cpp
 **********************************************/
-#include <vector>
-#include <iostream>
-#include <map>
-#include <string>
-#include <fstream>
 #include "Assembler.h"
 #include <algorithm>
-#include <sstream>
-#include "conversions.h"
-#include <limits>
 
 using namespace std;
 
-/***************************************************
- format1 & format2 functions simplify the translation 
- of their respective instruction formats. For use in 
- the assembly functions. 
-***************************************************/
-
-int format1( string opcode, int rd, string i, int rs ) {
-	
-    string RD, RS, code;
-	RD = dtb( rd, 2 ); RS = dtb( rs, 2 );
-	code = opcode + RD + i + RS + "000000";
-	return btd( code );
-}
-
-int format2( string opcode, int rd, string i, int addr ) {
-	
-    string RD, ADDR, code;
-	RD = dtb(rd, 2);
-    if ( i == "1" ) {
-		ADDR = dtb2(addr, 8);
-	}
-	else if (i == "0") {
-		ADDR = dtb(addr, 8);
-	}
-	code = opcode + RD + i + ADDR;
-	return btd(code);
-}
 
 /*******************************************************
  Loads map pointers to map functions using corresponding
@@ -53,10 +18,10 @@ int format2( string opcode, int rd, string i, int addr ) {
 *******************************************************/
 
 Assembler::Assembler(string filename) {
-	string s = filename + ".s";
-	string o = filename + ".o";
-	in.open(s.c_str());
-	out.open(o.c_str());
+	string name = filename + ".s";
+	in.open(name.c_str(), fstream::in);
+	name = filename + ".o";
+	out.open(name.c_str(), fstream::out);
 	typedef void (Assembler::*function)();
 	functions["load"] = &Assembler::load;
 	functions["loadi"] = &Assembler::loadi;
@@ -99,23 +64,19 @@ Assembler::Assembler(string filename) {
  function.  
 ********************************************************/
 
-bool Assembler::parse() {
-	while (!in.eof()) {
-		in >> opcode;
+void Assembler::parse() {
+	while (in >> opcode) {
+		
 		if(opcode == "!") {
 			in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			continue;
 		}
+		code.instr = 0;
     	(*this.*functions[opcode])();
 		in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		if (error()) {
-			break;
-			return false;
-		}
 	}
 	out.close();
 	in.close();
-	return true;
 }
 
 /***********************************************
@@ -123,213 +84,268 @@ bool Assembler::parse() {
 ************************************************/
 
 void Assembler::load() {
-    in >> rd;
-    in >>  addr;
-    machcode = format2( "00000", rd, "0", addr );
-    out << "\n" << machcode;
+	code.addr.opcode = 0;
+    in >> rd; 
+    code.addr.rd = rd;
+    in >>  addr; 
+    code.addr.addr = addr;
+    out << code.instr << "\n";
 }
 
 void Assembler::loadi() {
-    in >> rd;
-    in >>  constant;
-    machcode = format2( "00000", rd, "1", constant );
-    out << "\n" << machcode;
+	code.imed.opcode = 0;
+	code.imed.imed = 1;
+    in >> rd; 
+    code.imed.rd = rd;
+    in >> constant;
+    code.imed.constant = constant;
+    out << code.instr << "\n";
     
 }
 
 void Assembler::store() {
-    in >> rd;
-    in >>  addr;
-    machcode = format2( "00001", rd, "0", addr );
-    out << "\n" << machcode;
+	code.addr.opcode = 1;
+    in >> rd; 
+    code.addr.rd = rd;
+    in >> addr;
+    code.addr.addr = addr;
+    out << code.instr << "\n";
 }
 
 void Assembler::add() {
+	code.reg.opcode = 2;
     in >> rd;
+    code.reg.rd = rd;
     in >>  rs;
-    machcode = format1( "00010", rd, "0", rs );
-    out << "\n" << machcode;
+    code.reg.rs = rs;
+    out << code.instr << "\n";
 }
 
 void Assembler::addi() {
+	code.imed.opcode = 2;
+	code.imed.imed = 1;
     in >> rd;
+    code.imed.rd = rd;
     in >>  constant;
-    machcode = format2( "00010", rd, "1", constant );
-    out << "\n" << machcode;
+    code.imed.constant = constant;
+    out << code.instr << "\n";
 }
 
 void Assembler::addc() {
+	code.reg.opcode = 3;
     in >> rd;
-    in >>  rs;
-    machcode = format1( "00011", rd, "0", rs );
-    out << "\n" << machcode;
+    code.reg.rd = rd;
+    in >> rs;
+    code.reg.rs = rs;
+    out << code.instr << "\n";
 }
 
 void Assembler::addci() {
+	code.imed.opcode = 3;
+	code.imed.imed = 1;
     in >> rd;
-    in >>  constant;
-    machcode = format2( "00011", rd, "1", constant );
-    out << "\n" << machcode;
+    code.imed.rd = rd;
+    in >> constant;
+    code.imed.constant = constant;
+    out << code.instr << "\n";
 }
 
 void Assembler::sub() {
-    in >> rd;
-    in >>  rs;
-    machcode = format1( "00100", rd, "0", rs );
-    out << "\n" << machcode;
-    
+	code.reg.opcode = 4;
+    in >> rd; 
+    code.reg.rd = rd;
+    in >> rs; 
+    code.reg.rs = rs;
+    out << code.instr << "\n";   
 }
 
 void Assembler::subi() {
-    in >> rd;
-    in >>  constant;
-    machcode = format2( "00100", rd, "1", constant );
-    out << "\n" << machcode;
+	code.imed.opcode = 4;
+	code.imed.imed = 1;
+    in >> rd; 
+    code.imed.rd = rd;
+    in >> constant;
+    code.imed.constant = constant;
+    out << code.instr << "\n";
 }
 
 void Assembler::subc() {
-    in >> rd;
-    in >>  rs;
-    machcode = format1( "00101", rd, "0", rs );
-    out << "\n" << machcode;
+	code.reg.opcode = 5;
+    in >> rd; 
+    code.reg.rd = rd;
+    in >> rs; 
+    code.reg.rs = rs;
+    out << code.instr << "\n";
 }
 
 void Assembler::subci() {
-    in >> rd;
-    in >>  constant;
-    machcode = format2( "00101", rd, "1", constant );
-    out << "\n" << machcode;
+	code.imed.opcode = 5;
+	code.imed.imed = 1;
+    in >> rd; 
+    code.imed.rd = rd;
+    in >> constant;
+    code.imed.constant = constant;
+    out << code.instr << "\n";
 }
 
 void Assembler::ander() {
-    in >> rd;
-    in >>  rs;
-    machcode = format1( "00110", rd, "0", rs );
-    out << "\n" << machcode;
+	code.reg.opcode = 6;
+    in >> rd; 
+    code.reg.rd = rd;
+    in >> rs; 
+    code.reg.rs = rs;
+    out << code.instr << "\n";
 }
 
 void Assembler::andi() {
-    in >> rd;
-    in >>  constant;
-    machcode = format2( "00110", rd, "1", constant );
-    out << "\n" << machcode;
+	code.imed.opcode = 6;
+	code.imed.imed = 1;
+    in >> rd; 
+    code.imed.rd = rd;
+    in >> constant;
+    code.imed.constant = constant;
+    out << code.instr << "\n";
 }
 
 void Assembler::xorer() {
-    in >> rd;
-    in >>  rs;
-    machcode = format1( "00111", rd, "0", rs );
-    out << "\n" << machcode;
+	code.reg.opcode = 7;
+    in >> rd; 
+    code.reg.rd = rd;
+    in >> rs; 
+    code.reg.rs = rs;
+    out << code.instr << "\n";
 }
 
 void Assembler::xori() {
-    in >> rd;
-    in >>  constant;
-    machcode = format2( "00111", rd, "1", constant );
-    out << "\n" << machcode;
+	code.imed.opcode = 7;
+	code.imed.imed = 1;
+    in >> rd; 
+    code.imed.rd = rd;
+    in >> constant;
+    code.imed.constant = constant;
+    out << code.instr << "\n";
 }
 
 void Assembler::negate() {
-    in >> rd;
-    machcode = format1( "0000", rd, "1", addr );
-    out << "\n" << machcode;
+	code.reg.opcode = 8;
+    in >> rd; 
+    code.reg.rd = rd;
+    out << code.instr << "\n";
 }
 
 void Assembler::shl() {
-	in >> rd;
-	machcode = format1( "01001", rd, "0", 0 );
-	out << "\n" << machcode;
+	code.reg.opcode = 9;
+	in >> rd; 
+    code.reg.rd = rd;
+	out << code.instr << "\n";
 }
 
 void Assembler::shla() {
-	in >> rd;
-	machcode = format1( "01010", rd, "0", 0 );
-	out << "\n" << machcode;
+	code.reg.opcode = 10;
+	in >> rd; 
+    code.reg.rd = rd;
+	out << code.instr << "\n";
 }
 
 void Assembler::shr() {
-	in >> rd;
-	machcode = format1( "01011", rd, "0", 0 );
-	out << "\n" << machcode;
+	code.reg.opcode = 11;
+	in >> rd; 
+    code.reg.rd = rd;
+	out << code.instr << "\n";
 }
 
 void Assembler::shra() {
-	in >> rd;
-	machcode = format1( "01010", rd, "0", 0 );
-	out << "\n" << machcode;
+	code.reg.opcode = 12;
+	in >> rd; 
+    code.reg.rd = rd;
+	out << code.instr << "\n";
 }
 
 void Assembler::compr() {
-	in >> rd;
-	in >>  rs;
-	machcode = format1( "01101", rd, "0", rs );
-	out << "\n" << machcode;
+	code.reg.opcode = 13;
+	in >> rd; 
+    code.reg.rd = rd;
+	in >> rs; 
+    code.reg.rs = rs;
+	out << code.instr << "\n";
 }
 
 void Assembler::compri() {
-	in >> rd;
-	in >>  constant;
-	machcode = format2( "01101", rd, "1", constant );
-	out << "\n" << machcode;
+	code.imed.opcode = 13;
+	code.imed.imed = 1;
+	in >> rd; 
+    code.imed.rd = rd;
+	in >> constant;
+    code.imed.constant = constant;
+	out << code.instr << "\n";
 }
 
 void Assembler::getstat() {
-	in >> rd;
-	machcode = format1( "01110", rd, "0", 0 );
-	out << "\n" << machcode;
+	code.reg.opcode = 14;
+	in >> rd; 
+    code.reg.rd = rd;
+	out << code.instr << "\n";
 }
 
 void Assembler::putstat() {
-	in >> rd;
-	machcode = format1( "01111", rd, "0", 0 );
-	out << "\n" << machcode;
+	code.reg.opcode = 15;
+	in >> rd; 
+    code.reg.rd = rd;
+	out << code.instr << "\n";
 }
 
 void Assembler::jump() {
+	code.addr.opcode = 16;
 	in >> addr;
-	machcode = format2( "10000", 0, "0", addr );
-	out << "\n" << machcode;
+    code.addr.addr = addr;
+	out << code.instr << "\n";
 }
 
 void Assembler::jumpl() {
+	code.addr.opcode = 17;
 	in >> addr;
-	machcode = format2( "10001", 0, "0", addr );
-	out << "\n" << machcode;
+    code.addr.addr = addr;
+	out << code.instr << "\n";
 }
 
 void Assembler::jumpe() {
+	code.addr.opcode = 18;
 	in >> addr;
-	machcode = format2( "10010", 0, "0", addr );
-	out << "\n" << machcode;
+    code.addr.addr = addr;
+	out << code.instr << "\n";
 }
 
 void Assembler::jumpg() {
+	code.addr.opcode = 19;
 	in >> addr;
-	machcode = format2( "10011", 0, "0", addr );
-	out << "\n" << machcode;
+    code.addr.addr = addr;
+	out << code.instr << "\n";
 }
 
 void Assembler::call() {
+	code.addr.opcode = 20;
 	in >> addr;
-	machcode = format2( "10100", 0, "0", addr);
-	out << "\n" << machcode;
+    code.addr.addr = addr;
+	out << code.instr << "\n";
 }
 
 void Assembler::ret() {
-	machcode = format1( "10101", 0, "0", 0 );
-	out << "\n" << machcode;
+	code.reg.opcode = 21;
+	out << code.instr << "\n";
 }
 
 void Assembler::read() {
-	in >> rd;
-	machcode = format1( "10110", rd, "0", 0 );
-	out << "\n" << machcode;
+	code.reg.opcode = 22;
+	in >> rd; 
+    code.reg.rd = rd;
+	out << code.instr << "\n";
 }
 
 void Assembler::write() {
-	in >> rd;
-	machcode = format1( "10111", rd, "0", 0 );
-	out << "\n" << machcode;
+	code.reg.opcode = 23;
+	in >> rd; 
+    code.reg.rd = rd;
+	out << code.instr << "\n";
 }
 
 /**************************************************************
@@ -338,35 +354,11 @@ void Assembler::write() {
 ***************************************************************/
 
 void Assembler::halt() {
-	machcode = format1( "11000", 0, "0", 0 ); 
-	out << "\n" << machcode;
+	code.reg.opcode = 24;
+	out << code.instr << "\n";
 }
 
 void Assembler::noop() {
-	machcode = format1( "11001", 0, "0", 0 ); 
-}
-
-/**************************************************************
-An error checker for out of range errors
-***************************************************************/
-bool Assembler::error() {
-	if (!(rd >= 0 and rd <= 3)) {
-		cout << "Error destination register out of range!\n";
-		return true;
-	}
-	else if (!(rs >= 0 and rs <= 3)) {
-		cout << "Error source register out of range!\n";
-		return true;
-	}
-	else if (!(addr >= 0 and addr <= 256)) {
-		cout << "Error address out of range!\n";
-		return true;
-	}
-	else if (!(constant >= -128 and constant <= 128)) {
-		cout << "Error constant out of range!\n";
-		return true;
-	}
-	else {
-		return false;
-	}
+	code.reg.opcode = 25;
+	out << code.instr << "\n";
 }

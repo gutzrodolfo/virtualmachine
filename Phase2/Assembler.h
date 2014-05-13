@@ -1,16 +1,21 @@
 /**********************************************
-Phase 2 Project
+Phase 1 Project
 Groupmates: Eli Gonzalez & Rodolfo Gutierrez
-Date: 	    04/30/2014
+Date: 	    04/21/2014
 Class:	    CSE 460 
 
 Assembler.h
 **********************************************/
+#ifndef ASSEMBLER_H
+#define ASSEMBLER_H
+
 #include <vector>
 #include <iostream>
 #include <map>
 #include <string>
 #include <fstream>
+#include <limits>
+#include "unions.h"
 
 using namespace std;
 
@@ -18,7 +23,7 @@ class Assembler {
  
  public:
     Assembler(string filename);
-	bool parse();
+	void parse();
 	void load();
 	void loadi();
 	void store();
@@ -53,12 +58,13 @@ class Assembler {
 	void write();
 	void halt(); 
 	void noop();
-	bool error();
 
 private:
 	typedef void (Assembler::*function)();
 	map<string, function> functions;
- 	ifstream in; ofstream out; 
+ 	fstream in; fstream out; 
  	string opcode;
- 	int rd, rs, constant, addr, machcode; 
+ 	int rd, rs, addr, constant;
+ 	codes code; 
 };
+#endif

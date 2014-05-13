@@ -6,10 +6,14 @@ Class:      CSE 460
 
 PCB.h
 **********************************************/
+#ifndef PCB_H
+#define PCB_H
 
 #include <vector>
 #include <fstream>
 #include <string>
+#include <cassert>
+#include "unions.h"
 
 using namespace std;
 
@@ -26,12 +30,20 @@ private:
 	vector<int> registers;
 	fstream in, o, st;
 	fstream out;
-	int pc, sr, sp, base, limit;
+	int pc, sp, base, limit, read, write;
+	codes sr;
 	string pname;
 	//Declaring the friend classes accounting info later
+	long double processclk, waitclk, readyclk;
+	int stack;
+	long double time, wait_time, ready_time;
+	int turntime;
 	friend class VirtualMachine;
 	friend class os;
 public:
 	PCB(string);
-	void modify(vector<int>, int, int, int ,int, int);
+	void modify(vector<int>, codes, int, int, long double, int);
+	void print();
 };
+
+#endif

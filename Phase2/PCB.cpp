@@ -8,9 +8,6 @@ PCB.cpp
 **********************************************/
 
 #include "PCB.h"
-#include <vector>
-#include <fstream>
-#include <cassert>
 
 using namespace std;
 
@@ -26,18 +23,33 @@ PCB::PCB(string filename) {
 	name = filename + ".o";
 	o.open(name.c_str(), fstream::in);
 	name = filename + ".st";
-	st.open(name.c_str(), fstream::in | fstream::out);
+	st.open(name.c_str(), fstream::out);
+	st.close();
+	st.open(name.c_str(), fstream::out | fstream::in);
 	name = filename + ".out";
 	out.open(name.c_str(), fstream::out);
-	assert(out.is_open());
+	assert(o.is_open());
 	pname = filename;
+	registers = vector <int> (4);
+	assert(st.is_open());
+	pc = 0;  base = 0; sp = 255; limit = 0;
+	processclk = 0; waitclk = 0; readyclk = 0; stack = 0; turntime = 0;
 }
 
-void PCB::modify(vector<int> registers, int pc, int sr, int sp, int base,  int limit) {
+void PCB::modify(vector<int> registers, codes sr, int pc, int sp, long double clk, int stack) {
 	this -> registers = registers;
 	this -> pc = pc;
 	this -> sr = sr;
 	this -> sp = sp;
-	this -> base = base;
-	this -> limit = limit;
+	this -> processclk = clk;
+	this -> stack = stack; 
+}
+
+void PCB::print() {
+	out << "*** Process Specific Info ***\n"; 
+	out << "The CPU time is " << processclk << " number of clock ticks\n";
+	out << "The Waiting time is " << readyclk << " number of clock ticks\n"; 
+	out << "The Turnaround time is " << turntime << " number of seconds\n"; 
+	out << "The I/O time is " << waitclk << " number of clock ticks\n"; 
+	out << "The largest stack size is " << stack << endl; 
 }

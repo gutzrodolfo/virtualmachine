@@ -1,3 +1,6 @@
+#ifndef os_H
+#define os_H
+
 #include "Assembler.h"
 #include "VirtualMachine.h"
 #include "PCB.h"
@@ -21,10 +24,23 @@ private:
 	list <PCB *> jobs;
 	queue <PCB *> readyQ, waitQ;
 	PCB * running;
-	int stop;
+	int psize;
+	long double contextclk, finalclk, systime, useclk;
+	long double idle, nonidle;
+	long double cpu_util, use_util, throughput;
+	void erase();
+	void decide();
+	void decide_run();	
+	void decide_rq();
+	void decide_wq();
+	void io();
+	void timing();
+	void print();
 public:
 	os(); //First make sure that wil the constructor it will assemble all the files
 	void assemble();
 	void load(); //Used to load the files into memory
 	void run();
 };
+
+#endif

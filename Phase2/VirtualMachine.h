@@ -6,10 +6,15 @@ Class:      CSE 460
 
 VirtualMachine.h
 **********************************************/
+#ifndef VIRTUALMACHINE_H
+#define VIRTUALMACHINE_H
+
 #include <vector>
 #include <string>
 #include <map>
 #include <fstream>
+#include <limits>
+#include "unions.h"
 
 using namespace std;
 
@@ -20,10 +25,12 @@ private:
   static const int MEM_SIZE = 256;
   vector <int> r;
   vector <int> mem;
-  int pc, ir, sr, sp, clk, base, limit;
-  string irb; //IR in binary form
+  int pc, clk, sp, base, limit; 
+  int carry, max_sp;
+  long double timestamp, endtimestamp; 
+  codes ir, sr;
   typedef void (VirtualMachine::*function)();
-  map<string, function> functions;
+  map<int, function> functions;
   fstream *o, *in, *st;
   fstream *out;
   bool retn; 
@@ -31,7 +38,7 @@ private:
 public:
   VirtualMachine();
   //These are all available operation by the VM
-  void change( fstream *, fstream *, fstream *, fstream *, int, int, int, int, int, vector<int> ); 
+  void change( fstream *, fstream *, fstream *, fstream *, int, int, int, int, int, int, int, vector<int> ); 
   void parse(); 
   void load();
   void loadi();
@@ -64,10 +71,14 @@ public:
   void call();
   void ret();
   void read();
+  void read_helper(int);
+  void write_helper(int);
   void write();
   void halt(); 
   void noop();
   void overflow(int, int);
-//  bool error();
   void mem_load(fstream *);
+  void stack_save();
+  void stack_load();
 };
+#endif
