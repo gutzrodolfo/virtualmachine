@@ -145,6 +145,7 @@ void os::print() {
     sysout.open("system.out", fstream::out);
     sysout << "The system time is " << contextclk + idleclk << " clock ticks.\n";
     sysout << "The system CPU Utilization is " << (float(machine.vm_clk) + float(contextclk))/(float(contextclk) + float(machine.vm_clk) + float(idleclk)) * 100 << " percent.\n";
+    sysout << "The system User Utilization is " << float(machine.vm_clk)/(float(contextclk) + float(machine.vm_clk) + float(idleclk)) * 100 << " percent.\n";
     sysout << "Throughput is " << float(psize)/((float(machine.vm_clk) + float(contextclk) + float(idleclk))/1000) << " processes per second.\n";
     sysout.close();
 }
