@@ -26,7 +26,7 @@ private:
   vector <int> r;
   vector <int> mem;
   int pc, clk, sp, base, limit, vm_clk; 
-  int carry, max_sp;
+  int carry, max_sp, underflow;
   long double timestamp, endtimestamp; 
   codes ir, sr;
   typedef void (VirtualMachine::*function)();
@@ -82,7 +82,9 @@ public:
   void stack_load();
   void overflow_add(int, int);
   void overflow_shift(int);
-  void underflow();
+  void stack_overflow();
+  void stack_underflow();
   void invalid_opcode();
+  void out_of_bounds();
 };
 #endif

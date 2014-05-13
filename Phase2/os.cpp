@@ -43,13 +43,13 @@ void os::decide() {
 
 void os::decide_run() {
     if (machine.sr.status.r_status == 1) {
-        cout << "The final wait clock is "<< running -> readyclk << endl;
         running -> print(machine.vm_clk);
         idleclk += running -> readyclk + running -> waitclk;
         erase();
     }
     else if (machine.sr.status.r_status == 2 or machine.sr.status.r_status == 3 or machine.sr.status.r_status == 4 
         or machine.sr.status.r_status == 5) {
+        cout << "Error" << endl;
         erase();//Error has occured
     }
     else if (machine.sr.status.r_status == 6 or machine.sr.status.r_status == 7) {
@@ -143,6 +143,7 @@ void os::load() {
         running -> limit = machine.limit;
         running -> pc = running -> base;
     }
+    machine.underflow = machine.pc;
     machine.pc = 0;
     running = readyQ.front();
 }
@@ -172,12 +173,9 @@ void os::run() {
     while (!jobs.empty()){
         machine.change(&(running -> in), &(running -> o), &(running -> st), &(running -> out), running -> pc, running -> sr.instr, 
         running -> sp, running-> base, running -> limit, running -> processclk, running -> stack, running -> registers); 
-        cout << running -> pname << endl;
-        cout << running -> base << running-> limit << endl;
         machine.parse(running -> read, running -> write);
         running -> modify(machine.r, machine.sr, machine.pc, machine.sp, machine.clk, machine.max_sp);
-        decide(); 
-        cout << "The running PC after decide is " << running -> pc;     
+        decide();   
     }
     print();
 }

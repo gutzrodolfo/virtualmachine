@@ -7,8 +7,7 @@ Class:      CSE 460
 VirtualMachine.cpp
 **********************************************/
 #include "VirtualMachine.h"
-#include <stdlib.h> 
-#include <iostream>
+#include <stdlib.h>
 
 using namespace std;
  
@@ -89,7 +88,7 @@ void VirtualMachine::parse(int read, int write) {
       retn = true;
     }
     invalid_opcode();
-    cout << pc << endl;
+    out_of_bounds();
     if (retn) {
       stack_save();
       retn = false;
@@ -397,13 +396,13 @@ void VirtualMachine::jumpg() {
 }
 void VirtualMachine::call() {
   mem[sp--] = pc;
-  cout << "The call PC is " << pc << endl;
   mem[sp--] = r[0];
   mem[sp--] = r[1];
   mem[sp--] = r[2];
   mem[sp--] = r[3];
   mem[sp--] = sr.instr;
   pc = base + ir.addr.addr - 1;
+  stack_underflow();
   clk += 4;
   if ((255 - sp) > max_sp) {
     max_sp = 255 - sp;
@@ -417,7 +416,7 @@ void VirtualMachine::ret() {
   r[1] = mem[++sp];
   r[0] = mem[++sp];
   pc = mem[++sp];
-  cout << "The return PC is " << mem[sp] << endl;
+  stack_overflow();
   clk += 4;
   vm_clk += 4;
 }
@@ -518,7 +517,7 @@ as usual.
 void VirtualMachine::overflow_add(int x, int y) {
   int z = x + y;
   if ((z - x) != y or (z - y) != x) {
-    sr.status.r_status = 2;
+    sr.status.r_status = 3;
     retn = true;
   }
 }
@@ -526,7 +525,7 @@ void VirtualMachine::overflow_add(int x, int y) {
 void VirtualMachine::overflow_shift(int x) {
   int z =  2 * x;
   if (x != (z/2)) {
-  sr.status.r_status = 2;
+  sr.status.r_status = 3;
   retn = true;
   }
 }
@@ -539,6 +538,34 @@ the program needs to first fix it.
 void VirtualMachine::invalid_opcode() {
   if (ir.reg.opcode > 25 or ir.reg.opcode < 0) {
     sr.status.r_status = 5;
+    retn = true;
+  }
+}
+
+/*************************************************************************
+Detects overflow or underflow of the stack pointer to prevent it from going
+out of range.
+**************************************************************************/
+void VirtualMachine::stack_overflow() {
+  if(sp > 255) {
+    sr.status.r_status = 3;
+    retn = true;
+  }
+}
+void VirtualMachine::stack_underflow() {
+  if (sp < underflow) {
+    sr.status.r_status = 4;
+    retn = true;
+  }
+}
+
+
+/*************************************************************************
+Detects out of bounds error.
+**************************************************************************/
+void VirtualMachine::out_of_bounds() {
+  if(pc > base + limit + 1 or pc < base) {
+    sr.status.r_status = 2;
     retn = true;
   }
 }
